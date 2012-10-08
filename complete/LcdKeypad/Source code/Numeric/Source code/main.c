@@ -185,7 +185,7 @@ void Checking(  ) {
 
 // Command sending Routine :
 
-void LCD_data ( unsigned char a ) {
+void LCD_data ( unsigned char a ) { // send data from mcu to lcd
 
     Data = a & 0xF0 ;
     Command = (1<<RS) | (1<<E) ;
