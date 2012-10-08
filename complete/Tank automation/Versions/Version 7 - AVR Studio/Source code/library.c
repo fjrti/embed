@@ -6,7 +6,7 @@
 ///  ____________________________________________________________________________________________ INITIALIZATION
 
 
-void Initialization( )
+void Initialization(  )
 {
 
 	LcdDirecton         = 0xFF ;                                                            // as output
