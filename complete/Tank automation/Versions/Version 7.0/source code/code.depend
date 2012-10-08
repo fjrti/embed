@@ -1,0 +1,30 @@
+# depslib dependency file v1.0
+1343388109 source:c:\users\aurangzaib\documents\avr\source code\completed project\motor automation\source code\fuse.c
+	<avr/io.h>
+
+1344869874 source:f:\motor automation\final version\source code\main.c
+	"library.c"
+
+1344870522 f:\motor automation\final version\source code\library.c
+	"header.h"
+
+1344869872 f:\motor automation\final version\source code\header.h
+	<avr/io.h>
+	<util/delay.h>
+
+1343663956 source:f:\motor automation\final version\source code\fuse.c
+	<avr/io.h>
+
+1343663956 source:c:\users\aurangzaib\documents\avr\source code\completed project\motor automation\final version\source code\fuse.c
+	<avr/io.h>
+
+1344883182 source:c:\users\aurangzaib\documents\avr\source code\completed project\motor automation\final version\source code\main.c
+	"library.c"
+
+1344944004 c:\users\aurangzaib\documents\avr\source code\completed project\motor automation\final version\source code\library.c
+	"header.h"
+
+1344942105 c:\users\aurangzaib\documents\avr\source code\completed project\motor automation\final version\source code\header.h
+	<avr/io.h>
+	<util/delay.h>
+

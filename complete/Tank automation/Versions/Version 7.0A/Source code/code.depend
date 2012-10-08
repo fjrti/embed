@@ -1,0 +1,14 @@
+# depslib dependency file v1.0
+1345366658 source:c:\users\aurangzaib\documents\avr\source code\completed project\tank automation\version 7.0a\source code\fuse.c
+	<avr/io.h>
+
+1345373131 source:c:\users\aurangzaib\documents\avr\source code\completed project\tank automation\version 7.0a\source code\main.c
+	"library.c"
+
+1345375604 c:\users\aurangzaib\documents\avr\source code\completed project\tank automation\version 7.0a\source code\library.c
+	"header.h"
+
+1345373056 c:\users\aurangzaib\documents\avr\source code\completed project\tank automation\version 7.0a\source code\header.h
+	<avr/io.h>
+	<util/delay.h>
+

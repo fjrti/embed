@@ -1,0 +1,3578 @@
+   1               		.file	"program.c"
+   2               	__SREG__ = 0x3f
+   3               	__SP_H__ = 0x3e
+   4               	__SP_L__ = 0x3d
+   5               	__CCP__  = 0x34
+   6               	__tmp_reg__ = 0
+   7               	__zero_reg__ = 1
+   9               		.text
+  10               	.Ltext0:
+  68               		.data
+  69               	.LC0:
+  70 0000 5072 6573 		.string	"Press key"
+  70      7320 6B65 
+  70      7900 
+  71               		.text
+  73               	.global	main
+  75               	main:
+   1:program.c     **** /**
+   2:program.c     ****         LICENSE
+   3:program.c     **** 
+   4:program.c     ****   	Name: Keypad and LCD.c
+   5:program.c     ****  	Author: Aurangzaib Siddiqui
+   6:program.c     ****   	Creation Date: 2012-June-18
+   7:program.c     ****   	Tabsize: 4
+   8:program.c     ****  	License: GNU Public License (GPL) v3
+   9:program.c     ****       Output size : 1.77 ( HEX file ) KB
+  10:program.c     ****       Compiler : avr-gcc 4.6
+  11:program.c     **** 
+  12:program.c     **** 		ALGORITHM
+  13:program.c     **** 
+  14:program.c     **** Set ddr of LCD_data , LCD_cmd , keypad and send "Press any key" msg to LCD
+  15:program.c     **** Make keypad = 0xf0 i.e col as high and row as low. Check if keypad value is not 0xf0 means any of k
+  16:program.c     **** Now make row=0 and see for col==0 one by one and if ( bit_is_clear( PinD , ::: ) then send data to 
+  17:program.c     **** 
+  18:program.c     **** **/
+  19:program.c     **** 
+  20:program.c     **** /******		COMPILER DIRECTIVES		******/
+  21:program.c     **** 
+  22:program.c     **** 
+  23:program.c     **** #include <avr/io.h>
+  24:program.c     **** #include <util/delay.h>
+  25:program.c     **** 
+  26:program.c     **** #define Keypad_Out PORTB // to send data
+  27:program.c     **** #define Keypad_In PINB	 // to get data
+  28:program.c     **** 
+  29:program.c     **** #define Command PORTD	// Lcd command port
+  30:program.c     **** #define Data PORTC	// Lcd data port
+  31:program.c     **** 
+  32:program.c     **** #define  RS PD6		// Lcd register select pin
+  33:program.c     **** #define  E PD7		// Lcd Enable pin
+  34:program.c     **** 
+  35:program.c     **** #define Row1 PB0
+  36:program.c     **** #define Row2 PB1
+  37:program.c     **** #define Row3 PB2
+  38:program.c     **** #define Row4 PB3
+  39:program.c     **** 
+  40:program.c     **** #define Col1 PB4
+  41:program.c     **** #define Col2 PB5
+  42:program.c     **** #define Col3 PB6
+  43:program.c     **** #define Col4 PB7
+  44:program.c     **** 
+  45:program.c     **** // declaration :
+  46:program.c     **** 
+  47:program.c     **** void Initialization (    ) ;
+  48:program.c     **** 
+  49:program.c     **** void Checking (  ) ;
+  50:program.c     **** void LCD_command (unsigned char ) ;
+  51:program.c     **** 
+  52:program.c     **** void LCD_data (unsigned char ) ;
+  53:program.c     **** void LCD_print (char*) ;
+  54:program.c     **** 
+  55:program.c     **** 
+  56:program.c     **** /******		MAIN FUNCTION		******/
+  57:program.c     **** 
+  58:program.c     **** int main (  ) {
+  76               	L__
+  77               		in r29,__SP_H__
+  78               		sbiw r28,57
+  79 0000 DF93      		in __tmp_reg__,__SREG__
+  80 0002 CF93      		cli
+  81 0004 CDB7      		out __SP_H__,r29
+  82 0006 DEB7      		out __SREG__,__tmp_reg__
+  83 0008 E997      		out __SP_L__,r28
+  84 000a 0FB6      	/* prologue: function */
+  85 000c F894      	/* frame size = 57 */
+  87 0010 0FBE      	.LM1:
+  88 0012 CDBF      		call Initialization
+  90               	.LM2:
+  59:program.c     **** 
+  60:program.c     ****     Initialization( ) ;                                                     // Initialize LCD
+  91               	C0)
+  92               		ldi r25,hi8(.LC0)
+  93 0014 0E94 0000 		call LCD_print
+  61:program.c     ****     LCD_print( "Press key" ) ;
+  94               	i r24,lo8(0x41200000)
+  95               		ldi r25,hi8(0x41200000)
+  96 0018 80E0      		ldi r26,hlo8(0x41200000)
+  97 001a 90E0      		ldi r27,hhi8(0x41200000)
+  98 001c 0E94 0000 		std Y+53,r24
+  99 0020 80E0      		std Y+54,r25
+ 100 0022 90E0      		std Y+55,r26
+ 101 0024 A0E2      		std Y+56,r27
+ 102 0026 B1E4      	.LBB27:
+ 103 0028 8DAB      	.LBB28:
+ 105 002c AFAB      	.Ltext1:
+ 107               	.LM3:
+ 108               		ldd r22,Y+53
+ 109               		ldd r23,Y+54
+ 110               		ldd r24,Y+55
+   1:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** /* Copyright (c) 2002, Marek Michalkiewicz
+   2:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****    Copyright (c) 2004,2005,2007 Joerg Wunsch
+   3:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****    Copyright (c) 2007  Florin-Viorel Petrov
+   4:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****    All rights reserved.
+   5:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+   6:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****    Redistribution and use in source and binary forms, with or without
+   7:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****    modification, are permitted provided that the following conditions are met:
+   8:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+   9:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****    * Redistributions of source code must retain the above copyright
+  10:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****      notice, this list of conditions and the following disclaimer.
+  11:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+  12:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****    * Redistributions in binary form must reproduce the above copyright
+  13:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****      notice, this list of conditions and the following disclaimer in
+  14:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****      the documentation and/or other materials provided with the
+  15:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****      distribution.
+  16:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+  17:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****    * Neither the name of the copyright holders nor the names of
+  18:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****      contributors may be used to endorse or promote products derived
+  19:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****      from this software without specific prior written permission.
+  20:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+  21:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  22:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  23:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  24:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+  25:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  26:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  27:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  28:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  29:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  30:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  31:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****   POSSIBILITY OF SUCH DAMAGE. */
+  32:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+  33:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** /* $Id: delay.h,v 1.5.2.1 2009/02/25 10:14:03 joerg_wunsch Exp $ */
+  34:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+  35:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** #ifndef _UTIL_DELAY_H_
+  36:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** #define _UTIL_DELAY_H_ 1
+  37:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+  38:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** #include <inttypes.h>
+  39:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** #include <util/delay_basic.h>
+  40:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+  41:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** /** \file */
+  42:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** /** \defgroup util_delay <util/delay.h>: Convenience functions for busy-wait delay loops
+  43:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     \code
+  44:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     #define F_CPU 1000000UL  // 1 MHz
+  45:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     //#define F_CPU 14.7456E6
+  46:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     #include <util/delay.h>
+  47:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     \endcode
+  48:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+  49:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     \note As an alternative method, it is possible to pass the
+  50:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     F_CPU macro down to the compiler from the Makefile.
+  51:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     Obviously, in that case, no \c \#define statement should be
+  52:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     used.
+  53:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+  54:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     The functions in this header file are wrappers around the basic
+  55:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     busy-wait functions from <util/delay_basic.h>.  They are meant as
+  56:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     convenience functions where actual time values can be specified
+  57:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     rather than a number of cycles to wait for.  The idea behind is
+  58:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     that compile-time constant expressions will be eliminated by
+  59:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     compiler optimization so floating-point expressions can be used
+  60:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     to calculate the number of delay cycles needed based on the CPU
+  61:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     frequency passed by the macro F_CPU.
+  62:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+  63:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     \note In order for these functions to work as intended, compiler
+  64:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     optimizations <em>must</em> be enabled, and the delay time
+  65:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     <em>must</em> be an expression that is a known constant at
+  66:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     compile-time.  If these requirements are not met, the resulting
+  67:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     delay will be much longer (and basically unpredictable), and
+  68:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     applications that otherwise do not use floating-point calculations
+  69:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     will experience severe code bloat by the floating-point library
+  70:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     routines linked into the application.
+  71:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+  72:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     The functions available allow the specification of microsecond, and
+  73:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     millisecond delays directly, using the application-supplied macro
+  74:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****     F_CPU as the CPU clock frequency (in Hertz).
+  75:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+  76:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** */
+  77:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+  78:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** #if !defined(__DOXYGEN__)
+  79:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** static inline void _delay_us(double __us) __attribute__((always_inline));
+  80:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** static inline void _delay_ms(double __ms) __attribute__((always_inline));
+  81:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** #endif
+  82:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+  83:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** #ifndef F_CPU
+  84:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** /* prevent compiler error by supplying a default */
+  85:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** # warning "F_CPU not defined for <util/delay.h>"
+  86:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** # define F_CPU 1000000UL
+  87:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** #endif
+  88:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+  89:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** #ifndef __OPTIMIZE__
+  90:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** # warning "Compiler optimizations disabled; functions from <util/delay.h> won't work as designed"
+  91:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** #endif
+  92:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+  93:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** /**
+  94:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****    \ingroup util_delay
+  95:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+  96:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****    Perform a delay of \c __ms milliseconds, using _delay_loop_2().
+  97:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+  98:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****    The macro F_CPU is supposed to be defined to a
+  99:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****    constant defining the CPU clock frequency (in Hertz).
+ 100:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+ 101:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****    The maximal possible delay is 262.14 ms / F_CPU in MHz.
+ 102:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 
+ 103:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****    When the user request delay which exceed the maximum possible one,
+ 104:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****    _delay_ms() provides a decreased resolution functionality. In this
+ 105:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****    mode _delay_ms() will work with a resolution of 1/10 ms, providing
+ 106:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****    delays up to 6.5535 seconds (independent from CPU frequency).  The
+ 107:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****    user will not be informed about decreased resolution.
+ 108:c:/winavr/lib/gcc/../../avr/include/util/delay.h ****  */
+ 109:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** void
+ 110:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** _delay_ms(double __ms)
+ 111:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** {
+ 112:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 	uint16_t __ticks;
+ 113:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 	double __tmp = ((F_CPU) / 4e3) * __ms;
+ 111               	i r18,lo8(0x437a0000)
+ 112               		ldi r19,hi8(0x437a0000)
+ 113 0030 6DA9      		ldi r20,hlo8(0x437a0000)
+ 114 0032 7EA9      		ldi r21,hhi8(0x437a0000)
+ 115 0034 8FA9      		call __mulsf3
+ 116 0036 98AD      		movw r26,r24
+ 117 0038 20E0      		movw r24,r22
+ 118 003a 30E0      		std Y+49,r24
+ 119 003c 4AE7      		std Y+50,r25
+ 120 003e 53E4      		std Y+51,r26
+ 121 0040 0E94 0000 		std Y+52,r27
+ 123 0046 CB01      	.LM4:
+ 124 0048 89AB      		ldd r22,Y+49
+ 125 004a 9AAB      		ldd r23,Y+50
+ 126 004c ABAB      		ldd r24,Y+51
+ 127 004e BCAB      		ldd r25,Y+52
+ 114:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 	if (__tmp < 1.0)
+ 128               	800000)
+ 129               		ldi r19,hi8(0x3f800000)
+ 130 0050 69A9      		ldi r20,hlo8(0x3f800000)
+ 131 0052 7AA9      		ldi r21,hhi8(0x3f800000)
+ 132 0054 8BA9      		call __ltsf2
+ 133 0056 9CA9      		tst r24
+ 134 0058 20E0      		brge .L45
+ 135 005a 30E0      	.L37:
+ 137 005e 5FE3      	.LM5:
+ 138 0060 0E94 0000 		ldi r24,lo8(1)
+ 139 0064 8823      		ldi r25,hi8(1)
+ 140 0066 04F4      		std Y+48,r25
+ 141               		std Y+47,r24
+ 115:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 		__ticks = 1;
+ 142               	:
+ 144 0068 81E0      	.LM6:
+ 145 006a 90E0      		ldd r22,Y+49
+ 146 006c 98AB      		ldd r23,Y+50
+ 147 006e 8FA7      		ldd r24,Y+51
+ 148 0070 00C0      		ldd r25,Y+52
+ 149               		ldi r18,lo8(0x477fff00)
+ 116:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 	else if (__tmp > 65535)
+ 150               	,hi8(0x477fff00)
+ 151               		ldi r20,hlo8(0x477fff00)
+ 152 0072 69A9      		ldi r21,hhi8(0x477fff00)
+ 153 0074 7AA9      		call __gtsf2
+ 154 0076 8BA9      		cp __zero_reg__,r24
+ 155 0078 9CA9      		brge .L46
+ 156 007a 20E0      	.L38:
+ 158 007e 4FE7      	.LM7:
+ 159 0080 57E4      		ldd r22,Y+53
+ 160 0082 0E94 0000 		ldd r23,Y+54
+ 161 0086 1816      		ldd r24,Y+55
+ 162 0088 04F4      		ldd r25,Y+56
+ 163               		ldi r18,lo8(0x41200000)
+ 117:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 	{
+ 118:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 		//	__ticks = requested delay in 1/10 ms
+ 119:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 		__ticks = (uint16_t) (__ms * 10.0);
+ 164               	x41200000)
+ 165               		ldi r20,hlo8(0x41200000)
+ 166 008a 6DA9      		ldi r21,hhi8(0x41200000)
+ 167 008c 7EA9      		call __mulsf3
+ 168 008e 8FA9      		movw r26,r24
+ 169 0090 98AD      		movw r24,r22
+ 170 0092 20E0      		movw r22,r24
+ 171 0094 30E0      		movw r24,r26
+ 172 0096 40E2      		call __fixunssfsi
+ 173 0098 51E4      		movw r26,r24
+ 174 009a 0E94 0000 		movw r24,r22
+ 175 009e DC01      		std Y+48,r25
+ 176 00a0 CB01      		std Y+47,r24
+ 177 00a2 BC01      		rjmp .L7
+ 178 00a4 CD01      	.L8:
+ 179 00a6 0E94 0000 		ldi r24,lo8(25)
+ 180 00aa DC01      		ldi r25,hi8(25)
+ 181 00ac CB01      		std Y+46,r25
+ 182 00ae 98AB      		std Y+45,r24
+ 183 00b0 8FA7      	.LBB29:
+ 184 00b2 00C0      	.LBB30:
+ 186 00b4 89E1      	.Ltext2:
+ 188 00b8 9EA7      	.LM8:
+ 189 00ba 8DA7      		ldd r24,Y+45
+ 190               		ldd r25,Y+46
+ 191               	/* #APP */
+ 192               	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 193               		1: sbiw r24,1
+   1:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** /* Copyright (c) 2002, Marek Michalkiewicz
+   2:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****    Copyright (c) 2007 Joerg Wunsch
+   3:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****    All rights reserved.
+   4:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+   5:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****    Redistribution and use in source and binary forms, with or without
+   6:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****    modification, are permitted provided that the following conditions are met:
+   7:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+   8:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****    * Redistributions of source code must retain the above copyright
+   9:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****      notice, this list of conditions and the following disclaimer.
+  10:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+  11:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****    * Redistributions in binary form must reproduce the above copyright
+  12:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****      notice, this list of conditions and the following disclaimer in
+  13:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****      the documentation and/or other materials provided with the
+  14:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****      distribution.
+  15:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+  16:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****    * Neither the name of the copyright holders nor the names of
+  17:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****      contributors may be used to endorse or promote products derived
+  18:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****      from this software without specific prior written permission.
+  19:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+  20:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+  21:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****   AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+  22:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****   IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+  23:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****   ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+  24:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****   LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+  25:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****   CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+  26:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****   SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+  27:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****   INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+  28:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****   CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+  29:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****   ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+  30:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****   POSSIBILITY OF SUCH DAMAGE. */
+  31:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+  32:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** /* $Id: delay_basic.h,v 1.1 2007/05/13 21:23:20 joerg_wunsch Exp $ */
+  33:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+  34:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** #ifndef _UTIL_DELAY_BASIC_H_
+  35:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** #define _UTIL_DELAY_BASIC_H_ 1
+  36:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+  37:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** #include <inttypes.h>
+  38:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+  39:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** /** \file */
+  40:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** /** \defgroup util_delay_basic <util/delay_basic.h>: Basic busy-wait delay loops
+  41:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     \code
+  42:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     #include <util/delay_basic.h>
+  43:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     \endcode
+  44:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+  45:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     The functions in this header file implement simple delay loops
+  46:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     that perform a busy-waiting.  They are typically used to
+  47:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     facilitate short delays in the program execution.  They are
+  48:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     implemented as count-down loops with a well-known CPU cycle
+  49:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     count per loop iteration.  As such, no other processing can
+  50:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     occur simultaneously.  It should be kept in mind that the
+  51:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     functions described here do not disable interrupts.
+  52:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+  53:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     In general, for long delays, the use of hardware timers is
+  54:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     much preferrable, as they free the CPU, and allow for
+  55:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     concurrent processing of other events while the timer is
+  56:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     running.  However, in particular for very short delays, the
+  57:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     overhead of setting up a hardware timer is too much compared
+  58:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     to the overall delay time.
+  59:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+  60:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     Two inline functions are provided for the actual delay algorithms.
+  61:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+  62:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** */
+  63:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+  64:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** #if !defined(__DOXYGEN__)
+  65:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** static inline void _delay_loop_1(uint8_t __count) __attribute__((always_inline));
+  66:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** static inline void _delay_loop_2(uint16_t __count) __attribute__((always_inline));
+  67:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** #endif
+  68:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+  69:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** /** \ingroup util_delay_basic
+  70:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+  71:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     Delay loop using an 8-bit counter \c __count, so up to 256
+  72:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     iterations are possible.  (The value 256 would have to be passed
+  73:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     as 0.)  The loop executes three CPU cycles per iteration, not
+  74:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     including the overhead the compiler needs to setup the counter
+  75:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     register.
+  76:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+  77:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     Thus, at a CPU speed of 1 MHz, delays of up to 768 microseconds
+  78:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     can be achieved.
+  79:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** */
+  80:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** void
+  81:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** _delay_loop_1(uint8_t __count)
+  82:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** {
+  83:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 	__asm__ volatile (
+  84:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 		"1: dec %0" "\n\t"
+  85:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 		"brne 1b"
+  86:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 		: "=r" (__count)
+  87:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 		: "0" (__count)
+  88:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 	);
+  89:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** }
+  90:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+  91:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** /** \ingroup util_delay_basic
+  92:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+  93:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     Delay loop using a 16-bit counter \c __count, so up to 65536
+  94:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     iterations are possible.  (The value 65536 would have to be
+  95:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     passed as 0.)  The loop executes four CPU cycles per iteration,
+  96:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     not including the overhead the compiler requires to setup the
+  97:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     counter register pair.
+  98:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 
+  99:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     Thus, at a CPU speed of 1 MHz, delays of up to about 262.1
+ 100:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****     milliseconds can be achieved.
+ 101:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h ****  */
+ 102:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** void
+ 103:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** _delay_loop_2(uint16_t __count)
+ 104:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** {
+ 105:c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h **** 	__asm__ volatile (
+ 194               	*/
+ 195               		std Y+46,r25
+ 196 00bc 8DA5      		std Y+45,r24
+ 197 00be 9EA5      	.LBE30:
+ 198               	.LBE29:
+ 200 00c0 0197      	.Ltext3:
+ 202               	.LM9:
+ 203               		ldd r24,Y+47
+ 204 00c4 9EA7      		ldd r25,Y+48
+ 205 00c6 8DA7      		sbiw r24,1
+ 206               		std Y+48,r25
+ 207               		std Y+47,r24
+ 208               	.L7:
+ 120:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 		while(__ticks)
+ 121:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 		{
+ 122:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 			// wait 1/10 ms
+ 123:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 			_delay_loop_2(((F_CPU) / 4e3) / 10);
+ 124:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 			__ticks --;
+ 210               	Y+47
+ 211               		ldd r25,Y+48
+ 212 00c8 8FA5      		sbiw r24,0
+ 213 00ca 98A9      		brne .L8
+ 214 00cc 0197      		rjmp .L9
+ 215 00ce 98AB      	.L46:
+ 217               	.LM11:
+ 218               		ldd r22,Y+49
+ 219               		ldd r23,Y+50
+ 220 00d2 8FA5      		ldd r24,Y+51
+ 221 00d4 98A9      		ldd r25,Y+52
+ 222 00d6 0097      		call __fixunssfsi
+ 223 00d8 01F4      		movw r26,r24
+ 224 00da 00C0      		movw r24,r22
+ 225               		std Y+48,r25
+ 125:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 		}
+ 126:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 		return;
+ 127:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 	}
+ 128:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 	else
+ 129:c:/winavr/lib/gcc/../../avr/include/util/delay.h **** 		__ticks = (uint16_t)__tmp;
+ 226               	4:
+ 227               		ldd r24,Y+47
+ 228 00dc 69A9      		ldd r25,Y+48
+ 229 00de 7AA9      		std Y+44,r25
+ 230 00e0 8BA9      		std Y+43,r24
+ 231 00e2 9CA9      	.LBB31:
+ 232 00e4 0E94 0000 	.LBB32:
+ 234 00ea CB01      	.Ltext4:
+ 236 00ee 8FA7      	.LM12:
+ 237               		ldd r24,Y+43
+ 238 00f0 8FA5      		ldd r25,Y+44
+ 239 00f2 98A9      	/* #APP */
+ 240 00f4 9CA7      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 241 00f6 8BA7      		1: sbiw r24,1
+ 242               		brne 1b
+ 243               	 ;  0 "" 2
+ 244               	/* #NOAPP */
+ 245               		std Y+44,r25
+ 246               		std Y+43,r24
+ 247               	.L9:
+ 248 00f8 8BA5      	.LBE32:
+ 249 00fa 9CA5      	.LBE31:
+ 250               	.LBE28:
+ 251               	.LBE27:
+ 253 00fe 01F4      	.Ltext5:
+ 255               	.LM13:
+ 256 0100 9CA7      		ldi r24,lo8(1)
+ 257 0102 8BA7      		call LCD_command
+ 258               		ldi r24,lo8(0x40000000)
+ 259               		ldi r25,hi8(0x40000000)
+ 260               		ldi r26,hlo8(0x40000000)
+ 261               		ldi r27,hhi8(0x40000000)
+ 262               		std Y+39,r24
+ 263               		std Y+40,r25
+ 264               		std Y+41,r26
+  62:program.c     ****     _delay_ms ( 10 ) ;
+  63:program.c     **** 
+  64:program.c     ****     LCD_command( 0x01 ) ;
+ 265               	c:/winavr/lib/gcc/../../avr/include/util/delay.h",132,0,0,.Ltext6
+ 266               	.Ltext6:
+ 268 0106 0E94 0000 	.LM14:
+ 269 010a 80E0      		ldd r22,Y+39
+ 270 010c 90E0      		ldd r23,Y+40
+ 271 010e A0E0      		ldd r24,Y+41
+ 272 0110 B0E4      		ldd r25,Y+42
+ 273 0112 8FA3      		ldi r18,lo8(0x437a0000)
+ 274 0114 98A7      		ldi r19,hi8(0x437a0000)
+ 275 0116 A9A7      		ldi r20,hlo8(0x437a0000)
+ 276 0118 BAA7      		ldi r21,hhi8(0x437a0000)
+ 277               		call __mulsf3
+ 278               		movw r26,r24
+ 279               		movw r24,r22
+ 280               		std Y+35,r24
+ 281               		std Y+36,r25
+ 282               		std Y+37,r26
+ 283 011a 6FA1      		std Y+38,r27
+ 285 011e 89A5      	.LM15:
+ 286 0120 9AA5      		ldd r22,Y+35
+ 287 0122 20E0      		ldd r23,Y+36
+ 288 0124 30E0      		ldd r24,Y+37
+ 289 0126 4AE7      		ldd r25,Y+38
+ 290 0128 53E4      		ldi r18,lo8(0x3f800000)
+ 291 012a 0E94 0000 		ldi r19,hi8(0x3f800000)
+ 292 012e DC01      		ldi r20,hlo8(0x3f800000)
+ 293 0130 CB01      		ldi r21,hhi8(0x3f800000)
+ 294 0132 8BA3      		call __ltsf2
+ 295 0134 9CA3      		tst r24
+ 296 0136 ADA3      		brge .L47
+ 297 0138 BEA3      	.L39:
+ 299               	.LM16:
+ 300 013a 6BA1      		ldi r24,lo8(1)
+ 301 013c 7CA1      		ldi r25,hi8(1)
+ 302 013e 8DA1      		std Y+34,r25
+ 303 0140 9EA1      		std Y+33,r24
+ 304 0142 20E0      		rjmp .L12
+ 305 0144 30E0      	.L47:
+ 307 0148 5FE3      	.LM17:
+ 308 014a 0E94 0000 		ldd r22,Y+35
+ 309 014e 8823      		ldd r23,Y+36
+ 310 0150 04F4      		ldd r24,Y+37
+ 311               		ldd r25,Y+38
+ 312               		ldi r18,lo8(0x477fff00)
+ 313               		ldi r19,hi8(0x477fff00)
+ 314 0152 81E0      		ldi r20,hlo8(0x477fff00)
+ 315 0154 90E0      		ldi r21,hhi8(0x477fff00)
+ 316 0156 9AA3      		call __gtsf2
+ 317 0158 89A3      		cp __zero_reg__,r24
+ 318 015a 00C0      		brge .L48
+ 319               	.L40:
+ 321               	.LM18:
+ 322 015c 6BA1      		ldd r22,Y+39
+ 323 015e 7CA1      		ldd r23,Y+40
+ 324 0160 8DA1      		ldd r24,Y+41
+ 325 0162 9EA1      		ldd r25,Y+42
+ 326 0164 20E0      		ldi r18,lo8(0x41200000)
+ 327 0166 3FEF      		ldi r19,hi8(0x41200000)
+ 328 0168 4FE7      		ldi r20,hlo8(0x41200000)
+ 329 016a 57E4      		ldi r21,hhi8(0x41200000)
+ 330 016c 0E94 0000 		call __mulsf3
+ 331 0170 1816      		movw r26,r24
+ 332 0172 04F4      		movw r24,r22
+ 333               		movw r22,r24
+ 334               		movw r24,r26
+ 335               		call __fixunssfsi
+ 336 0174 6FA1      		movw r26,r24
+ 337 0176 78A5      		movw r24,r22
+ 338 0178 89A5      		std Y+34,r25
+ 339 017a 9AA5      		std Y+33,r24
+ 340 017c 20E0      		rjmp .L15
+ 341 017e 30E0      	.L16:
+ 342 0180 40E2      		ldi r24,lo8(25)
+ 343 0182 51E4      		ldi r25,hi8(25)
+ 344 0184 0E94 0000 		std Y+32,r25
+ 345 0188 DC01      		std Y+31,r24
+ 346 018a CB01      	.LBB35:
+ 347 018c BC01      	.LBB36:
+ 349 0190 0E94 0000 	.Ltext7:
+ 351 0196 CB01      	.LM19:
+ 352 0198 9AA3      		ldd r24,Y+31
+ 353 019a 89A3      		ldd r25,Y+32
+ 354 019c 00C0      	/* #APP */
+ 355               	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 356 019e 89E1      		1: sbiw r24,1
+ 357 01a0 90E0      		brne 1b
+ 358 01a2 98A3      	 ;  0 "" 2
+ 359 01a4 8F8F      	/* #NOAPP */
+ 360               		std Y+32,r25
+ 361               		std Y+31,r24
+ 362               	.LBE36:
+ 363               	.LBE35:
+ 365               	.Ltext8:
+ 367 01a8 98A1      	.LM20:
+ 368               		ldd r24,Y+33
+ 369               		ldd r25,Y+34
+ 370 01aa 0197      		sbiw r24,1
+ 371 01ac 01F4      		std Y+34,r25
+ 372               		std Y+33,r24
+ 373               	.L15:
+ 375 01b0 8F8F      	.LM21:
+ 376               		ldd r24,Y+33
+ 377               		ldd r25,Y+34
+ 378               		sbiw r24,0
+ 379               		brne .L16
+ 380               		rjmp .L35
+ 381               	.L48:
+ 383 01b4 9AA1      	.LM22:
+ 384 01b6 0197      		ldd r22,Y+35
+ 385 01b8 9AA3      		ldd r23,Y+36
+ 386 01ba 89A3      		ldd r24,Y+37
+ 387               		ldd r25,Y+38
+ 388               		call __fixunssfsi
+ 389               		movw r26,r24
+ 390 01bc 89A1      		movw r24,r22
+ 391 01be 9AA1      		std Y+34,r25
+ 392 01c0 0097      		std Y+33,r24
+ 393 01c2 01F4      	.L12:
+ 394 01c4 00C0      		ldd r24,Y+33
+ 395               		ldd r25,Y+34
+ 396               		std Y+30,r25
+ 397               		std Y+29,r24
+ 398 01c6 6BA1      	.LBB37:
+ 399 01c8 7CA1      	.LBB38:
+ 401 01cc 9EA1      	.Ltext9:
+ 403 01d2 DC01      	.LM23:
+ 404 01d4 CB01      		ldd r24,Y+29
+ 405 01d6 9AA3      		ldd r25,Y+30
+ 406 01d8 89A3      	/* #APP */
+ 407               	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 408 01da 89A1      		1: sbiw r24,1
+ 409 01dc 9AA1      		brne 1b
+ 410 01de 9E8F      	 ;  0 "" 2
+ 411 01e0 8D8F      	/* #NOAPP */
+ 412               		std Y+30,r25
+ 413               		std Y+29,r24
+ 414               	.L35:
+ 415               	.LBE38:
+ 416               	.LBE37:
+ 417               	.LBE34:
+ 418 01e2 8D8D      	.LBE33:
+ 419 01e4 9E8D      	.LBB39:
+ 421               	.Ltext10:
+ 423 01e8 01F4      	.LM24:
+ 424               		ldi r30,lo8(56)
+ 425               		ldi r31,hi8(56)
+ 426 01ea 9E8F      		ldi r24,lo8(-16)
+ 427 01ec 8D8F      		st Z,r24
+ 428               		ldi r24,lo8(0x41a00000)
+ 429               		ldi r25,hi8(0x41a00000)
+ 430               		ldi r26,hlo8(0x41a00000)
+ 431               		ldi r27,hhi8(0x41a00000)
+ 432               		std Y+25,r24
+ 433               		std Y+26,r25
+ 434               		std Y+27,r26
+ 435               		std Y+28,r27
+  65:program.c     ****     _delay_ms ( 2 ) ;
+  66:program.c     **** 
+  67:program.c     ****     for ( ;; ) {
+  68:program.c     **** 
+  69:program.c     ****         Keypad_Out = 0xF0 ; // row =0, col =1
+ 436               	 r24,Y+27
+ 437               		ldd r25,Y+28
+ 438 01ee E8E3      		ldi r18,lo8(0x437a0000)
+ 439 01f0 F0E0      		ldi r19,hi8(0x437a0000)
+ 440 01f2 80EF      		ldi r20,hlo8(0x437a0000)
+ 441 01f4 8083      		ldi r21,hhi8(0x437a0000)
+ 442 01f6 80E0      		call __mulsf3
+ 443 01f8 90E0      		movw r26,r24
+ 444 01fa A0EA      		movw r24,r22
+ 445 01fc B1E4      		std Y+21,r24
+ 446 01fe 898F      		std Y+22,r25
+ 447 0200 9A8F      		std Y+23,r26
+ 448 0202 AB8F      		std Y+24,r27
+ 450               	.LM26:
+ 451               		ldd r22,Y+21
+ 452               		ldd r23,Y+22
+ 453               		ldd r24,Y+23
+ 454               		ldd r25,Y+24
+ 455               		ldi r18,lo8(0x3f800000)
+ 456 0206 698D      		ldi r19,hi8(0x3f800000)
+ 457 0208 7A8D      		ldi r20,hlo8(0x3f800000)
+ 458 020a 8B8D      		ldi r21,hhi8(0x3f800000)
+ 459 020c 9C8D      		call __ltsf2
+ 460 020e 20E0      		tst r24
+ 461 0210 30E0      		brge .L49
+ 462 0212 4AE7      	.L41:
+ 464 0216 0E94 0000 	.LM27:
+ 465 021a DC01      		ldi r24,lo8(1)
+ 466 021c CB01      		ldi r25,hi8(1)
+ 467 021e 8D8B      		std Y+20,r25
+ 468 0220 9E8B      		std Y+19,r24
+ 469 0222 AF8B      		rjmp .L20
+ 470 0224 B88F      	.L49:
+ 472               	.LM28:
+ 473 0226 6D89      		ldd r22,Y+21
+ 474 0228 7E89      		ldd r23,Y+22
+ 475 022a 8F89      		ldd r24,Y+23
+ 476 022c 988D      		ldd r25,Y+24
+ 477 022e 20E0      		ldi r18,lo8(0x477fff00)
+ 478 0230 30E0      		ldi r19,hi8(0x477fff00)
+ 479 0232 40E8      		ldi r20,hlo8(0x477fff00)
+ 480 0234 5FE3      		ldi r21,hhi8(0x477fff00)
+ 481 0236 0E94 0000 		call __gtsf2
+ 482 023a 8823      		cp __zero_reg__,r24
+ 483 023c 04F4      		brge .L50
+ 484               	.L42:
+ 486               	.LM29:
+ 487 023e 81E0      		ldd r22,Y+25
+ 488 0240 90E0      		ldd r23,Y+26
+ 489 0242 9C8B      		ldd r24,Y+27
+ 490 0244 8B8B      		ldd r25,Y+28
+ 491 0246 00C0      		ldi r18,lo8(0x41200000)
+ 492               		ldi r19,hi8(0x41200000)
+ 493               		ldi r20,hlo8(0x41200000)
+ 494               		ldi r21,hhi8(0x41200000)
+ 495 0248 6D89      		call __mulsf3
+ 496 024a 7E89      		movw r26,r24
+ 497 024c 8F89      		movw r24,r22
+ 498 024e 988D      		movw r22,r24
+ 499 0250 20E0      		movw r24,r26
+ 500 0252 3FEF      		call __fixunssfsi
+ 501 0254 4FE7      		movw r26,r24
+ 502 0256 57E4      		movw r24,r22
+ 503 0258 0E94 0000 		std Y+20,r25
+ 504 025c 1816      		std Y+19,r24
+ 505 025e 04F4      		rjmp .L23
+ 506               	.L24:
+ 507               		ldi r24,lo8(25)
+ 508               		ldi r25,hi8(25)
+ 509 0260 698D      		std Y+18,r25
+ 510 0262 7A8D      		std Y+17,r24
+ 511 0264 8B8D      	.LBB42:
+ 512 0266 9C8D      	.LBB43:
+ 514 026a 30E0      	.Ltext12:
+ 516 026e 51E4      	.LM30:
+ 517 0270 0E94 0000 		ldd r24,Y+17
+ 518 0274 DC01      		ldd r25,Y+18
+ 519 0276 CB01      	/* #APP */
+ 520 0278 BC01      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 521 027a CD01      		1: sbiw r24,1
+ 522 027c 0E94 0000 		brne 1b
+ 523 0280 DC01      	 ;  0 "" 2
+ 524 0282 CB01      	/* #NOAPP */
+ 525 0284 9C8B      		std Y+18,r25
+ 526 0286 8B8B      		std Y+17,r24
+ 527 0288 00C0      	.LBE43:
+ 528               	.LBE42:
+ 530 028c 90E0      	.Ltext13:
+ 532 0290 898B      	.LM31:
+ 533               		ldd r24,Y+19
+ 534               		ldd r25,Y+20
+ 535               		sbiw r24,1
+ 536               		std Y+20,r25
+ 537               		std Y+19,r24
+ 538               	.L23:
+ 540 0294 9A89      	.LM32:
+ 541               		ldd r24,Y+19
+ 542               		ldd r25,Y+20
+ 543 0296 0197      		sbiw r24,0
+ 544 0298 01F4      		brne .L24
+ 545               		rjmp .L25
+ 546               	.L50:
+ 548 029c 898B      	.LM33:
+ 549               		ldd r22,Y+21
+ 550               		ldd r23,Y+22
+ 551               		ldd r24,Y+23
+ 552               		ldd r25,Y+24
+ 553               		call __fixunssfsi
+ 554               		movw r26,r24
+ 555 029e 8B89      		movw r24,r22
+ 556 02a0 9C89      		std Y+20,r25
+ 557 02a2 0197      		std Y+19,r24
+ 558 02a4 9C8B      	.L20:
+ 559 02a6 8B8B      		ldd r24,Y+19
+ 560               		ldd r25,Y+20
+ 561               		std Y+16,r25
+ 562               		std Y+15,r24
+ 563 02a8 8B89      	.LBB44:
+ 564 02aa 9C89      	.LBB45:
+ 566 02ae 01F4      	.Ltext14:
+ 568               	.LM34:
+ 569               		ldd r24,Y+15
+ 570               		ldd r25,Y+16
+ 571 02b2 6D89      	/* #APP */
+ 572 02b4 7E89      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 573 02b6 8F89      		1: sbiw r24,1
+ 574 02b8 988D      		brne 1b
+ 575 02ba 0E94 0000 	 ;  0 "" 2
+ 576 02be DC01      	/* #NOAPP */
+ 577 02c0 CB01      		std Y+16,r25
+ 578 02c2 9C8B      		std Y+15,r24
+ 579 02c4 8B8B      	.L25:
+ 580               	.LBE45:
+ 581 02c6 8B89      	.LBE44:
+ 582 02c8 9C89      	.LBE41:
+ 583 02ca 988B      	.LBE40:
+ 585               	.Ltext15:
+ 587               	.LM35:
+ 588               		ldi r30,lo8(54)
+ 589               		ldi r31,hi8(54)
+ 590               		ld r24,Z
+ 591 02ce 8F85      		std Y+57,r24
+ 593               	.LM36:
+ 594               		ldd r24,Y+57
+ 595 02d2 0197      		cpi r24,lo8(-16)
+ 596 02d4 01F4      		brne .+2
+ 597               		rjmp .L35
+ 598               		ldi r24,lo8(0x41a00000)
+ 599 02d6 988B      		ldi r25,hi8(0x41a00000)
+ 600 02d8 8F87      		ldi r26,hlo8(0x41a00000)
+ 601               		ldi r27,hhi8(0x41a00000)
+ 602               		std Y+11,r24
+ 603               		std Y+12,r25
+ 604               		std Y+13,r26
+ 605               		std Y+14,r27
+ 606               	.LBB46:
+ 607               	.LBB47:
+  70:program.c     ****         _delay_ms ( 20 ) ;
+  71:program.c     ****         unsigned char buffer = Keypad_In ;
+ 608               	5,Y+14
+ 609               		ldi r18,lo8(0x437a0000)
+ 610 02da E6E3      		ldi r19,hi8(0x437a0000)
+ 611 02dc F0E0      		ldi r20,hlo8(0x437a0000)
+ 612 02de 8081      		ldi r21,hhi8(0x437a0000)
+ 613 02e0 89AF      		call __mulsf3
+  72:program.c     ****         if ( buffer != 0xF0 )   { // i.e any column key is pressed
+ 614               	r26,r24
+ 615               		movw r24,r22
+ 616 02e2 89AD      		std Y+7,r24
+ 617 02e4 803F      		std Y+8,r25
+ 618 02e6 01F4      		std Y+9,r26
+ 619 02e8 00C0      		std Y+10,r27
+ 621 02ec 90E0      	.LM38:
+ 622 02ee A0EA      		ldd r22,Y+7
+ 623 02f0 B1E4      		ldd r23,Y+8
+ 624 02f2 8B87      		ldd r24,Y+9
+ 625 02f4 9C87      		ldd r25,Y+10
+ 626 02f6 AD87      		ldi r18,lo8(0x3f800000)
+ 627 02f8 BE87      		ldi r19,hi8(0x3f800000)
+ 628               		ldi r20,hlo8(0x3f800000)
+ 629               		ldi r21,hhi8(0x3f800000)
+ 630               		call __ltsf2
+ 631               		tst r24
+ 632               		brge .L51
+ 633               	.L43:
+ 635 02fc 7C85      	.LM39:
+ 636 02fe 8D85      		ldi r24,lo8(1)
+ 637 0300 9E85      		ldi r25,hi8(1)
+ 638 0302 20E0      		std Y+6,r25
+ 639 0304 30E0      		std Y+5,r24
+ 640 0306 4AE7      		rjmp .L29
+ 641 0308 53E4      	.L51:
+ 643 030e DC01      	.LM40:
+ 644 0310 CB01      		ldd r22,Y+7
+ 645 0312 8F83      		ldd r23,Y+8
+ 646 0314 9887      		ldd r24,Y+9
+ 647 0316 A987      		ldd r25,Y+10
+ 648 0318 BA87      		ldi r18,lo8(0x477fff00)
+ 649               		ldi r19,hi8(0x477fff00)
+ 650               		ldi r20,hlo8(0x477fff00)
+ 651 031a 6F81      		ldi r21,hhi8(0x477fff00)
+ 652 031c 7885      		call __gtsf2
+ 653 031e 8985      		cp __zero_reg__,r24
+ 654 0320 9A85      		brge .L52
+ 655 0322 20E0      	.L44:
+ 657 0326 40E8      	.LM41:
+ 658 0328 5FE3      		ldd r22,Y+11
+ 659 032a 0E94 0000 		ldd r23,Y+12
+ 660 032e 8823      		ldd r24,Y+13
+ 661 0330 04F4      		ldd r25,Y+14
+ 662               		ldi r18,lo8(0x41200000)
+ 663               		ldi r19,hi8(0x41200000)
+ 664               		ldi r20,hlo8(0x41200000)
+ 665 0332 81E0      		ldi r21,hhi8(0x41200000)
+ 666 0334 90E0      		call __mulsf3
+ 667 0336 9E83      		movw r26,r24
+ 668 0338 8D83      		movw r24,r22
+ 669 033a 00C0      		movw r22,r24
+ 670               		movw r24,r26
+ 671               		call __fixunssfsi
+ 672               		movw r26,r24
+ 673 033c 6F81      		movw r24,r22
+ 674 033e 7885      		std Y+6,r25
+ 675 0340 8985      		std Y+5,r24
+ 676 0342 9A85      		rjmp .L32
+ 677 0344 20E0      	.L33:
+ 678 0346 3FEF      		ldi r24,lo8(25)
+ 679 0348 4FE7      		ldi r25,hi8(25)
+ 680 034a 57E4      		std Y+4,r25
+ 681 034c 0E94 0000 		std Y+3,r24
+ 682 0350 1816      	.LBB48:
+ 683 0352 04F4      	.LBB49:
+ 685               	.Ltext17:
+ 687 0354 6B85      	.LM42:
+ 688 0356 7C85      		ldd r24,Y+3
+ 689 0358 8D85      		ldd r25,Y+4
+ 690 035a 9E85      	/* #APP */
+ 691 035c 20E0      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 692 035e 30E0      		1: sbiw r24,1
+ 693 0360 40E2      		brne 1b
+ 694 0362 51E4      	 ;  0 "" 2
+ 695 0364 0E94 0000 	/* #NOAPP */
+ 696 0368 DC01      		std Y+4,r25
+ 697 036a CB01      		std Y+3,r24
+ 698 036c BC01      	.LBE49:
+ 699 036e CD01      	.LBE48:
+ 701 0374 DC01      	.Ltext18:
+ 703 0378 9E83      	.LM43:
+ 704 037a 8D83      		ldd r24,Y+5
+ 705 037c 00C0      		ldd r25,Y+6
+ 706               		sbiw r24,1
+ 707 037e 89E1      		std Y+6,r25
+ 708 0380 90E0      		std Y+5,r24
+ 709 0382 9C83      	.L32:
+ 711               	.LM44:
+ 712               		ldd r24,Y+5
+ 713               		ldd r25,Y+6
+ 714               		sbiw r24,0
+ 715               		brne .L33
+ 716               		rjmp .L34
+ 717 0386 8B81      	.L52:
+ 719               	.LM45:
+ 720               		ldd r22,Y+7
+ 721 038a 0197      		ldd r23,Y+8
+ 722 038c 01F4      		ldd r24,Y+9
+ 723               		ldd r25,Y+10
+ 724               		call __fixunssfsi
+ 725 038e 9C83      		movw r26,r24
+ 726 0390 8B83      		movw r24,r22
+ 727               		std Y+6,r25
+ 728               		std Y+5,r24
+ 729               	.L29:
+ 730               		ldd r24,Y+5
+ 731               		ldd r25,Y+6
+ 732               		std Y+2,r25
+ 733 0392 8D81      		std Y+1,r24
+ 734 0394 9E81      	.LBB50:
+ 735 0396 0197      	.LBB51:
+ 737 039a 8D83      	.Ltext19:
+ 739               	.LM46:
+ 740               		ldd r24,Y+1
+ 741 039c 8D81      		ldd r25,Y+2
+ 742 039e 9E81      	/* #APP */
+ 743 03a0 0097      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 744 03a2 01F4      		1: sbiw r24,1
+ 745 03a4 00C0      		brne 1b
+ 746               	 ;  0 "" 2
+ 747               	/* #NOAPP */
+ 748               		std Y+2,r25
+ 749 03a6 6F81      		std Y+1,r24
+ 750 03a8 7885      	.L34:
+ 751 03aa 8985      	.LBE51:
+ 752 03ac 9A85      	.LBE50:
+ 753 03ae 0E94 0000 	.LBE47:
+ 754 03b2 DC01      	.LBE46:
+ 756 03b6 9E83      	.Ltext20:
+ 758               	.LM47:
+ 759 03ba 8D81      		ldi r30,lo8(54)
+ 760 03bc 9E81      		ldi r31,hi8(54)
+ 761 03be 9A83      		ld r24,Z
+ 762 03c0 8983      		std Y+57,r24
+ 764               	.LM48:
+ 765               		ldd r24,Y+57
+ 766               		cpi r24,lo8(-16)
+ 767               		brne .+2
+ 768               		rjmp .L35
+ 769 03c2 8981      		call Checking
+ 770 03c4 9A81      		rjmp .L35
+ 771               	.LBE39:
+ 776               	.Lscope1:
+ 778 03cc 8983      	.global	Initialization
+ 780               	Initialization:
+ 782               	.LM49:
+ 783               	.LFBB2:
+ 784               		push r29
+ 785               		push r28
+  73:program.c     **** 
+  74:program.c     **** // now repeated same thing again to ensure that key was pressed
+  75:program.c     **** 
+  76:program.c     ****             _delay_ms( 20 )    ;
+  77:program.c     ****             buffer = Keypad_In ;
+ 786               	 size = 56 */
+ 788 03ce E6E3      	.LM50:
+ 789 03d0 F0E0      		ldi r30,lo8(55)
+ 790 03d2 8081      		ldi r31,hi8(55)
+ 791 03d4 89AF      		ldi r24,lo8(15)
+  78:program.c     **** 
+  79:program.c     ****             if ( buffer != 0xF0 )   Checking( ) ;  // some key is pressed
+ 792               	r24
+ 794 03d6 89AD      	.LM51:
+ 795 03d8 803F      		ldi r30,lo8(52)
+ 796 03da 01F4      		ldi r31,hi8(52)
+ 797 03dc 00C0      		ldi r24,lo8(-1)
+ 798 03de 0E94 0000 		st Z,r24
+ 800               	.LM52:
+ 801               		ldi r30,lo8(49)
+ 802               		ldi r31,hi8(49)
+ 803               		ldi r24,lo8(-64)
+ 804               		st Z,r24
+ 806               	.LM53:
+ 807               		ldi r30,lo8(56)
+ 808               		ldi r31,hi8(56)
+ 809               		ldi r24,lo8(-16)
+  80:program.c     ****         }
+  81:program.c     ****     }
+  82:program.c     **** }
+  83:program.c     **** 
+  84:program.c     **** void Initialization ( ) {
+ 810               	68,0,96,.LM54-.LFBB2
+ 811               	.LM54:
+ 812               		ldi r24,lo8(56)
+ 813 03e4 DF93      		call LCD_command
+ 814 03e6 CF93      		ldi r24,lo8(0x3f800000)
+ 815 03e8 CDB7      		ldi r25,hi8(0x3f800000)
+ 816 03ea DEB7      		ldi r26,hlo8(0x3f800000)
+ 817 03ec E897      		ldi r27,hhi8(0x3f800000)
+ 818 03ee 0FB6      		std Y+53,r24
+ 819 03f0 F894      		std Y+54,r25
+ 820 03f2 DEBF      		std Y+55,r26
+ 821 03f4 0FBE      		std Y+56,r27
+ 822 03f6 CDBF      	.LBB76:
+ 823               	.LBB77:
+  85:program.c     **** 
+  86:program.c     **** //	setting direction registers :
+  87:program.c     **** 
+  88:program.c     ****     DDRB = 0X0F ;                                                   // row as output , col as input
+ 825               	bn	68,0,113,.LM55-.LFBB2
+ 826               	.LM55:
+ 827 03f8 E7E3      		ldd r22,Y+53
+ 828 03fa F0E0      		ldd r23,Y+54
+ 829 03fc 8FE0      		ldd r24,Y+55
+ 830 03fe 8083      		ldd r25,Y+56
+  89:program.c     ****     DDRC = 0XFF ;                                                   // data port - LCD
+ 831               	18,lo8(0x437a0000)
+ 832               		ldi r19,hi8(0x437a0000)
+ 833 0400 E4E3      		ldi r20,hlo8(0x437a0000)
+ 834 0402 F0E0      		ldi r21,hhi8(0x437a0000)
+ 835 0404 8FEF      		call __mulsf3
+ 836 0406 8083      		movw r26,r24
+  90:program.c     **** 
+  91:program.c     ****     DDRD = (1<<RS) | (1<<E) ;
+ 837               	r24,r22
+ 838               		std Y+49,r24
+ 839 0408 E1E3      		std Y+50,r25
+ 840 040a F0E0      		std Y+51,r26
+ 841 040c 80EC      		std Y+52,r27
+  92:program.c     ****     Keypad_Out = 0xF0 ;
+ 843               	
+ 844               		ldd r22,Y+49
+ 845 0410 E8E3      		ldd r23,Y+50
+ 846 0412 F0E0      		ldd r24,Y+51
+ 847 0414 80EF      		ldd r25,Y+52
+ 848 0416 8083      		ldi r18,lo8(0x3f800000)
+  93:program.c     **** 
+  94:program.c     **** //	setting lcd :
+  95:program.c     **** 
+  96:program.c     ****     LCD_command(0x38) ;                                                 // 8 bit mode
+ 849               	r19,hi8(0x3f800000)
+ 850               		ldi r20,hlo8(0x3f800000)
+ 851 0418 88E3      		ldi r21,hhi8(0x3f800000)
+ 852 041a 0E94 0000 		call __ltsf2
+ 853 041e 80E0      		tst r24
+ 854 0420 90E0      		brge .L95
+ 855 0422 A0E8      	.L87:
+ 857 0426 8DAB      	.LM57:
+ 858 0428 9EAB      		ldi r24,lo8(1)
+ 859 042a AFAB      		ldi r25,hi8(1)
+ 860 042c B8AF      		std Y+48,r25
+ 861               		std Y+47,r24
+ 862               		rjmp .L56
+ 863               	.L95:
+ 865               	.LM58:
+ 866               		ldd r22,Y+49
+ 867 042e 6DA9      		ldd r23,Y+50
+ 868 0430 7EA9      		ldd r24,Y+51
+ 869 0432 8FA9      		ldd r25,Y+52
+ 870 0434 98AD      		ldi r18,lo8(0x477fff00)
+ 871 0436 20E0      		ldi r19,hi8(0x477fff00)
+ 872 0438 30E0      		ldi r20,hlo8(0x477fff00)
+ 873 043a 4AE7      		ldi r21,hhi8(0x477fff00)
+ 874 043c 53E4      		call __gtsf2
+ 875 043e 0E94 0000 		cp __zero_reg__,r24
+ 876 0442 DC01      		brge .L96
+ 877 0444 CB01      	.L88:
+ 879 0448 9AAB      	.LM59:
+ 880 044a ABAB      		ldd r22,Y+53
+ 881 044c BCAB      		ldd r23,Y+54
+ 882               		ldd r24,Y+55
+ 883               		ldd r25,Y+56
+ 884 044e 69A9      		ldi r18,lo8(0x41200000)
+ 885 0450 7AA9      		ldi r19,hi8(0x41200000)
+ 886 0452 8BA9      		ldi r20,hlo8(0x41200000)
+ 887 0454 9CA9      		ldi r21,hhi8(0x41200000)
+ 888 0456 20E0      		call __mulsf3
+ 889 0458 30E0      		movw r26,r24
+ 890 045a 40E8      		movw r24,r22
+ 891 045c 5FE3      		movw r22,r24
+ 892 045e 0E94 0000 		movw r24,r26
+ 893 0462 8823      		call __fixunssfsi
+ 894 0464 04F4      		movw r26,r24
+ 895               		movw r24,r22
+ 896               		std Y+48,r25
+ 897               		std Y+47,r24
+ 898 0466 81E0      		rjmp .L59
+ 899 0468 90E0      	.L60:
+ 900 046a 98AB      		ldi r24,lo8(25)
+ 901 046c 8FA7      		ldi r25,hi8(25)
+ 902 046e 00C0      		std Y+46,r25
+ 903               		std Y+45,r24
+ 904               	.LBB78:
+ 905               	.LBB79:
+ 907 0472 7AA9      	.Ltext22:
+ 909 0476 9CA9      	.LM60:
+ 910 0478 20E0      		ldd r24,Y+45
+ 911 047a 3FEF      		ldd r25,Y+46
+ 912 047c 4FE7      	/* #APP */
+ 913 047e 57E4      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 914 0480 0E94 0000 		1: sbiw r24,1
+ 915 0484 1816      		brne 1b
+ 916 0486 04F4      	 ;  0 "" 2
+ 917               	/* #NOAPP */
+ 918               		std Y+46,r25
+ 919               		std Y+45,r24
+ 920 0488 6DA9      	.LBE79:
+ 921 048a 7EA9      	.LBE78:
+ 923 048e 98AD      	.Ltext23:
+ 925 0492 30E0      	.LM61:
+ 926 0494 40E2      		ldd r24,Y+47
+ 927 0496 51E4      		ldd r25,Y+48
+ 928 0498 0E94 0000 		sbiw r24,1
+ 929 049c DC01      		std Y+48,r25
+ 930 049e CB01      		std Y+47,r24
+ 931 04a0 BC01      	.L59:
+ 933 04a4 0E94 0000 	.LM62:
+ 934 04a8 DC01      		ldd r24,Y+47
+ 935 04aa CB01      		ldd r25,Y+48
+ 936 04ac 98AB      		sbiw r24,0
+ 937 04ae 8FA7      		brne .L60
+ 938 04b0 00C0      		rjmp .L61
+ 939               	.L96:
+ 941 04b4 90E0      	.LM63:
+ 942 04b6 9EA7      		ldd r22,Y+49
+ 943 04b8 8DA7      		ldd r23,Y+50
+ 944               		ldd r24,Y+51
+ 945               		ldd r25,Y+52
+ 946               		call __fixunssfsi
+ 947               		movw r26,r24
+ 948               		movw r24,r22
+ 949               		std Y+48,r25
+ 950 04ba 8DA5      		std Y+47,r24
+ 951 04bc 9EA5      	.L56:
+ 952               		ldd r24,Y+47
+ 953               		ldd r25,Y+48
+ 954 04be 0197      		std Y+44,r25
+ 955 04c0 01F4      		std Y+43,r24
+ 956               	.LBB80:
+ 957               	.LBB81:
+ 959 04c4 8DA7      	.Ltext24:
+ 961               	.LM64:
+ 962               		ldd r24,Y+43
+ 963               		ldd r25,Y+44
+ 964               	/* #APP */
+ 965               	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 966 04c6 8FA5      		1: sbiw r24,1
+ 967 04c8 98A9      		brne 1b
+ 968 04ca 0197      	 ;  0 "" 2
+ 969 04cc 98AB      	/* #NOAPP */
+ 970 04ce 8FA7      		std Y+44,r25
+ 971               		std Y+43,r24
+ 972               	.L61:
+ 973               	.LBE81:
+ 974 04d0 8FA5      	.LBE80:
+ 975 04d2 98A9      	.LBE77:
+ 976 04d4 0097      	.LBE76:
+ 978 04d8 00C0      	.Ltext25:
+ 980               	.LM65:
+ 981               		ldi r24,lo8(6)
+ 982 04da 69A9      		call LCD_command
+ 983 04dc 7AA9      		ldi r24,lo8(0x3f800000)
+ 984 04de 8BA9      		ldi r25,hi8(0x3f800000)
+ 985 04e0 9CA9      		ldi r26,hlo8(0x3f800000)
+ 986 04e2 0E94 0000 		ldi r27,hhi8(0x3f800000)
+ 987 04e6 DC01      		std Y+39,r24
+ 988 04e8 CB01      		std Y+40,r25
+ 989 04ea 98AB      		std Y+41,r26
+ 990 04ec 8FA7      		std Y+42,r27
+ 991               	.LBB82:
+ 992 04ee 8FA5      	.LBB83:
+ 994 04f2 9CA7      	.Ltext26:
+ 996               	.LM66:
+ 997               		ldd r22,Y+39
+ 998               		ldd r23,Y+40
+ 999               		ldd r24,Y+41
+ 1000               		ldd r25,Y+42
+ 1001               		ldi r18,lo8(0x437a0000)
+ 1002 04f6 8BA5      		ldi r19,hi8(0x437a0000)
+ 1003 04f8 9CA5      		ldi r20,hlo8(0x437a0000)
+ 1004               		ldi r21,hhi8(0x437a0000)
+ 1005               		call __mulsf3
+ 1006 04fa 0197      		movw r26,r24
+ 1007 04fc 01F4      		movw r24,r22
+ 1008               		std Y+35,r24
+ 1009               		std Y+36,r25
+ 1010 04fe 9CA7      		std Y+37,r26
+ 1011 0500 8BA7      		std Y+38,r27
+ 1013               	.LM67:
+ 1014               		ldd r22,Y+35
+ 1015               		ldd r23,Y+36
+ 1016               		ldd r24,Y+37
+ 1017               		ldd r25,Y+38
+ 1018               		ldi r18,lo8(0x3f800000)
+  97:program.c     ****     _delay_ms (1) ;
+  98:program.c     **** 
+  99:program.c     ****     LCD_command(0x06) ;                                                 // cursor at right
+ 1019               		ldi r25,hi8(1)
+ 1020               		std Y+34,r25
+ 1021 0502 86E0      		std Y+33,r24
+ 1022 0504 0E94 0000 		rjmp .L64
+ 1023 0508 80E0      	.L97:
+ 1025 050c A0E8      	.LM69:
+ 1026 050e BFE3      		ldd r22,Y+35
+ 1027 0510 8FA3      		ldd r23,Y+36
+ 1028 0512 98A7      		ldd r24,Y+37
+ 1029 0514 A9A7      		ldd r25,Y+38
+ 1030 0516 BAA7      		ldi r18,lo8(0x477fff00)
+ 1031               		ldi r19,hi8(0x477fff00)
+ 1032               		ldi r20,hlo8(0x477fff00)
+ 1033               		ldi r21,hhi8(0x477fff00)
+ 1034               		call __gtsf2
+ 1035               		cp __zero_reg__,r24
+ 1036               		brge .L98
+ 1037 0518 6FA1      	.L90:
+ 1039 051c 89A5      	.LM70:
+ 1040 051e 9AA5      		ldd r22,Y+39
+ 1041 0520 20E0      		ldd r23,Y+40
+ 1042 0522 30E0      		ldd r24,Y+41
+ 1043 0524 4AE7      		ldd r25,Y+42
+ 1044 0526 53E4      		ldi r18,lo8(0x41200000)
+ 1045 0528 0E94 0000 		ldi r19,hi8(0x41200000)
+ 1046 052c DC01      		ldi r20,hlo8(0x41200000)
+ 1047 052e CB01      		ldi r21,hhi8(0x41200000)
+ 1048 0530 8BA3      		call __mulsf3
+ 1049 0532 9CA3      		movw r26,r24
+ 1050 0534 ADA3      		movw r24,r22
+ 1051 0536 BEA3      		movw r22,r24
+ 1052               		movw r24,r26
+ 1053               		call __fixunssfsi
+ 1054 0538 6BA1      		movw r26,r24
+ 1055 053a 7CA1      		movw r24,r22
+ 1056 053c 8DA1      		std Y+34,r25
+ 1057 053e 9EA1      		std Y+33,r24
+ 1058 0540 20E0      		rjmp .L67
+ 1059 0542 30E0      	.L68:
+ 1060 0544 40E8      		ldi r24,lo8(25)
+ 1061 0546 5FE3      		ldi r25,hi8(25)
+ 1062 0548 0E94 0000 		std Y+32,r25
+ 1063 054c 8823      		std Y+31,r24
+ 1064 054e 04F4      	.LBB84:
+ 1065               	.LBB85:
+ 1067               	.Ltext27:
+ 1069 0552 90E0      	.LM71:
+ 1070 0554 9AA3      		ldd r24,Y+31
+ 1071 0556 89A3      		ldd r25,Y+32
+ 1072 0558 00C0      	/* #APP */
+ 1073               	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 1074               		1: sbiw r24,1
+ 1075               		brne 1b
+ 1076 055a 6BA1      	 ;  0 "" 2
+ 1077 055c 7CA1      	/* #NOAPP */
+ 1078 055e 8DA1      		std Y+32,r25
+ 1079 0560 9EA1      		std Y+31,r24
+ 1080 0562 20E0      	.LBE85:
+ 1081 0564 3FEF      	.LBE84:
+ 1083 0568 57E4      	.Ltext28:
+ 1085 056e 1816      	.LM72:
+ 1086 0570 04F4      		ldd r24,Y+33
+ 1087               		ldd r25,Y+34
+ 1088               		sbiw r24,1
+ 1089               		std Y+34,r25
+ 1090 0572 6FA1      		std Y+33,r24
+ 1091 0574 78A5      	.L67:
+ 1093 0578 9AA5      	.LM73:
+ 1094 057a 20E0      		ldd r24,Y+33
+ 1095 057c 30E0      		ldd r25,Y+34
+ 1096 057e 40E2      		sbiw r24,0
+ 1097 0580 51E4      		brne .L68
+ 1098 0582 0E94 0000 		rjmp .L69
+ 1099 0586 DC01      	.L98:
+ 1101 058a BC01      	.LM74:
+ 1102 058c CD01      		ldd r22,Y+35
+ 1103 058e 0E94 0000 		ldd r23,Y+36
+ 1104 0592 DC01      		ldd r24,Y+37
+ 1105 0594 CB01      		ldd r25,Y+38
+ 1106 0596 9AA3      		call __fixunssfsi
+ 1107 0598 89A3      		movw r26,r24
+ 1108 059a 00C0      		movw r24,r22
+ 1109               		std Y+34,r25
+ 1110 059c 89E1      		std Y+33,r24
+ 1111 059e 90E0      	.L64:
+ 1112 05a0 98A3      		ldd r24,Y+33
+ 1113 05a2 8F8F      		ldd r25,Y+34
+ 1114               		std Y+30,r25
+ 1115               		std Y+29,r24
+ 1116               	.LBB86:
+ 1117               	.LBB87:
+ 1119               	.Ltext29:
+ 1121 05a6 98A1      	.LM75:
+ 1122               		ldd r24,Y+29
+ 1123               		ldd r25,Y+30
+ 1124 05a8 0197      	/* #APP */
+ 1125 05aa 01F4      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 1126               		1: sbiw r24,1
+ 1127               		brne 1b
+ 1128 05ac 98A3      	 ;  0 "" 2
+ 1129 05ae 8F8F      	/* #NOAPP */
+ 1130               		std Y+30,r25
+ 1131               		std Y+29,r24
+ 1132               	.L69:
+ 1133               	.LBE87:
+ 1134               	.LBE86:
+ 1135               	.LBE83:
+ 1136 05b0 89A1      	.LBE82:
+ 1138 05b4 0197      	.Ltext30:
+ 1140 05b8 89A3      	.LM76:
+ 1141               		ldi r24,lo8(14)
+ 1142               		call LCD_command
+ 1143               		ldi r24,lo8(0x3f800000)
+ 1144 05ba 89A1      		ldi r25,hi8(0x3f800000)
+ 1145 05bc 9AA1      		ldi r26,hlo8(0x3f800000)
+ 1146 05be 0097      		ldi r27,hhi8(0x3f800000)
+ 1147 05c0 01F4      		std Y+25,r24
+ 1148 05c2 00C0      		std Y+26,r25
+ 1149               		std Y+27,r26
+ 1150               		std Y+28,r27
+ 1151               	.LBB88:
+ 1152 05c4 6BA1      	.LBB89:
+ 1154 05c8 8DA1      	.Ltext31:
+ 1156 05cc 0E94 0000 	.LM77:
+ 1157 05d0 DC01      		ldd r22,Y+25
+ 1158 05d2 CB01      		ldd r23,Y+26
+ 1159 05d4 9AA3      		ldd r24,Y+27
+ 1160 05d6 89A3      		ldd r25,Y+28
+ 1161               		ldi r18,lo8(0x437a0000)
+ 1162 05d8 89A1      		ldi r19,hi8(0x437a0000)
+ 1163 05da 9AA1      		ldi r20,hlo8(0x437a0000)
+ 1164 05dc 9E8F      		ldi r21,hhi8(0x437a0000)
+ 1165 05de 8D8F      		call __mulsf3
+ 1166               		movw r26,r24
+ 1167               		movw r24,r22
+ 1168               		std Y+21,r24
+ 1169               		std Y+22,r25
+ 1170               		std Y+23,r26
+ 1171               		std Y+24,r27
+ 1173 05e2 9E8D      	.LM78:
+ 1174               		ldd r22,Y+21
+ 1175               		ldd r23,Y+22
+ 1176 05e4 0197      		ldd r24,Y+23
+ 1177 05e6 01F4      		ldd r25,Y+24
+ 1178               		ldi r18,lo8(0x3f800000)
+ 1179               		ldi r19,hi8(0x3f800000)
+ 1180 05e8 9E8F      		ldi r20,hlo8(0x3f800000)
+ 1181 05ea 8D8F      		ldi r21,hhi8(0x3f800000)
+ 1182               		call __ltsf2
+ 1183               		tst r24
+ 1184               		brge .L99
+ 1185               	.L91:
+ 1187               	.LM79:
+ 1188               		ldi r24,lo8(1)
+ 100:program.c     ****     _delay_ms (1) ;
+ 101:program.c     **** 
+ 102:program.c     ****     LCD_command(0x0E) ;                                                 // cursor blinking
+ 1189               	77fff00)
+ 1190               		ldi r19,hi8(0x477fff00)
+ 1191 05ec 8EE0      		ldi r20,hlo8(0x477fff00)
+ 1192 05ee 0E94 0000 		ldi r21,hhi8(0x477fff00)
+ 1193 05f2 80E0      		call __gtsf2
+ 1194 05f4 90E0      		cp __zero_reg__,r24
+ 1195 05f6 A0E8      		brge .L100
+ 1196 05f8 BFE3      	.L92:
+ 1198 05fc 9A8F      	.LM81:
+ 1199 05fe AB8F      		ldd r22,Y+25
+ 1200 0600 BC8F      		ldd r23,Y+26
+ 1201               		ldd r24,Y+27
+ 1202               		ldd r25,Y+28
+ 1203               		ldi r18,lo8(0x41200000)
+ 1204               		ldi r19,hi8(0x41200000)
+ 1205               		ldi r20,hlo8(0x41200000)
+ 1206               		ldi r21,hhi8(0x41200000)
+ 1207 0602 698D      		call __mulsf3
+ 1208 0604 7A8D      		movw r26,r24
+ 1209 0606 8B8D      		movw r24,r22
+ 1210 0608 9C8D      		movw r22,r24
+ 1211 060a 20E0      		movw r24,r26
+ 1212 060c 30E0      		call __fixunssfsi
+ 1213 060e 4AE7      		movw r26,r24
+ 1214 0610 53E4      		movw r24,r22
+ 1215 0612 0E94 0000 		std Y+20,r25
+ 1216 0616 DC01      		std Y+19,r24
+ 1217 0618 CB01      		rjmp .L75
+ 1218 061a 8D8B      	.L76:
+ 1219 061c 9E8B      		ldi r24,lo8(25)
+ 1220 061e AF8B      		ldi r25,hi8(25)
+ 1221 0620 B88F      		std Y+18,r25
+ 1222               		std Y+17,r24
+ 1223               	.LBB90:
+ 1224 0622 6D89      	.LBB91:
+ 1226 0626 8F89      	.Ltext32:
+ 1228 062a 20E0      	.LM82:
+ 1229 062c 30E0      		ldd r24,Y+17
+ 1230 062e 40E8      		ldd r25,Y+18
+ 1231 0630 5FE3      	/* #APP */
+ 1232 0632 0E94 0000 	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 1233 0636 8823      		1: sbiw r24,1
+ 1234 0638 04F4      		brne 1b
+ 1235               	 ;  0 "" 2
+ 1236               	/* #NOAPP */
+ 1237               		std Y+18,r25
+ 1238 063a 81E0      		std Y+17,r24
+ 1239 063c 90E0      	.LBE91:
+ 1240 063e 9C8B      	.LBE90:
+ 1242 0642 00C0      	.Ltext33:
+ 1244               	.LM83:
+ 1245               		ldd r24,Y+19
+ 1246 0644 6D89      		ldd r25,Y+20
+ 1247 0646 7E89      		sbiw r24,1
+ 1248 0648 8F89      		std Y+20,r25
+ 1249 064a 988D      		std Y+19,r24
+ 1250 064c 20E0      	.L75:
+ 1252 0650 4FE7      	.LM84:
+ 1253 0652 57E4      		ldd r24,Y+19
+ 1254 0654 0E94 0000 		ldd r25,Y+20
+ 1255 0658 1816      		sbiw r24,0
+ 1256 065a 04F4      		brne .L76
+ 1257               		rjmp .L77
+ 1258               	.L100:
+ 1260 065c 698D      	.LM85:
+ 1261 065e 7A8D      		ldd r22,Y+21
+ 1262 0660 8B8D      		ldd r23,Y+22
+ 1263 0662 9C8D      		ldd r24,Y+23
+ 1264 0664 20E0      		ldd r25,Y+24
+ 1265 0666 30E0      		call __fixunssfsi
+ 1266 0668 40E2      		movw r26,r24
+ 1267 066a 51E4      		movw r24,r22
+ 1268 066c 0E94 0000 		std Y+20,r25
+ 1269 0670 DC01      		std Y+19,r24
+ 1270 0672 CB01      	.L72:
+ 1271 0674 BC01      		ldd r24,Y+19
+ 1272 0676 CD01      		ldd r25,Y+20
+ 1273 0678 0E94 0000 		std Y+16,r25
+ 1274 067c DC01      		std Y+15,r24
+ 1275 067e CB01      	.LBB92:
+ 1276 0680 9C8B      	.LBB93:
+ 1278 0684 00C0      	.Ltext34:
+ 1280 0686 89E1      	.LM86:
+ 1281 0688 90E0      		ldd r24,Y+15
+ 1282 068a 9A8B      		ldd r25,Y+16
+ 1283 068c 898B      	/* #APP */
+ 1284               	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 1285               		1: sbiw r24,1
+ 1286               		brne 1b
+ 1287               	 ;  0 "" 2
+ 1288               	/* #NOAPP */
+ 1289               		std Y+16,r25
+ 1290 068e 8989      		std Y+15,r24
+ 1291 0690 9A89      	.L77:
+ 1292               	.LBE93:
+ 1293               	.LBE92:
+ 1294 0692 0197      	.LBE89:
+ 1295 0694 01F4      	.LBE88:
+ 1297               	.Ltext35:
+ 1299 0698 898B      	.LM87:
+ 1300               		ldi r24,lo8(1)
+ 1301               		call LCD_command
+ 1302               		ldi r24,lo8(0x40000000)
+ 1303               		ldi r25,hi8(0x40000000)
+ 1304               		ldi r26,hlo8(0x40000000)
+ 1305               		ldi r27,hhi8(0x40000000)
+ 1306 069a 8B89      		std Y+11,r24
+ 1307 069c 9C89      		std Y+12,r25
+ 1308 069e 0197      		std Y+13,r26
+ 1309 06a0 9C8B      		std Y+14,r27
+ 1310 06a2 8B8B      	.LBB94:
+ 1311               	.LBB95:
+ 1313               	.Ltext36:
+ 1315 06a6 9C89      	.LM88:
+ 1316 06a8 0097      		ldd r22,Y+11
+ 1317 06aa 01F4      		ldd r23,Y+12
+ 1318 06ac 00C0      		ldd r24,Y+13
+ 1319               		ldd r25,Y+14
+ 1320               		ldi r18,lo8(0x437a0000)
+ 1321               		ldi r19,hi8(0x437a0000)
+ 1322 06ae 6D89      		ldi r20,hlo8(0x437a0000)
+ 1323 06b0 7E89      		ldi r21,hhi8(0x437a0000)
+ 1324 06b2 8F89      		call __mulsf3
+ 1325 06b4 988D      		movw r26,r24
+ 1326 06b6 0E94 0000 		movw r24,r22
+ 1327 06ba DC01      		std Y+7,r24
+ 1328 06bc CB01      		std Y+8,r25
+ 1329 06be 9C8B      		std Y+9,r26
+ 1330 06c0 8B8B      		std Y+10,r27
+ 1332 06c2 8B89      	.LM89:
+ 1333 06c4 9C89      		ldd r22,Y+7
+ 1334 06c6 988B      		ldd r23,Y+8
+ 1335 06c8 8F87      		ldd r24,Y+9
+ 1336               		ldd r25,Y+10
+ 1337               		ldi r18,lo8(0x3f800000)
+ 1338               		ldi r19,hi8(0x3f800000)
+ 1339               		ldi r20,hlo8(0x3f800000)
+ 1340               		ldi r21,hhi8(0x3f800000)
+ 1341               		call __ltsf2
+ 1342 06ca 8F85      		tst r24
+ 1343 06cc 9889      		brge .L101
+ 1344               	.L93:
+ 1346 06ce 0197      	.LM90:
+ 1347 06d0 01F4      		ldi r24,lo8(1)
+ 1348               		ldi r25,hi8(1)
+ 1349               		std Y+6,r25
+ 1350 06d2 988B      		std Y+5,r24
+ 1351 06d4 8F87      		rjmp .L80
+ 1352               	.L101:
+ 1354               	.LM91:
+ 1355               		ldd r22,Y+7
+ 1356               		ldd r23,Y+8
+ 1357               		ldd r24,Y+9
+ 1358               		ldd r25,Y+10
+ 103:program.c     ****     _delay_ms (1) ;
+ 104:program.c     **** 
+ 105:program.c     ****     LCD_command(0x01) ;                                                  // clear lcd
+ 1359               	9,.LM92-.LFBB2
+ 1360               	.LM92:
+ 1361 06d6 81E0      		ldd r22,Y+11
+ 1362 06d8 0E94 0000 		ldd r23,Y+12
+ 1363 06dc 80E0      		ldd r24,Y+13
+ 1364 06de 90E0      		ldd r25,Y+14
+ 1365 06e0 A0E0      		ldi r18,lo8(0x41200000)
+ 1366 06e2 B0E4      		ldi r19,hi8(0x41200000)
+ 1367 06e4 8B87      		ldi r20,hlo8(0x41200000)
+ 1368 06e6 9C87      		ldi r21,hhi8(0x41200000)
+ 1369 06e8 AD87      		call __mulsf3
+ 1370 06ea BE87      		movw r26,r24
+ 1371               		movw r24,r22
+ 1372               		movw r22,r24
+ 1373               		movw r24,r26
+ 1374               		call __fixunssfsi
+ 1375               		movw r26,r24
+ 1376               		movw r24,r22
+ 1377 06ec 6B85      		std Y+6,r25
+ 1378 06ee 7C85      		std Y+5,r24
+ 1379 06f0 8D85      		rjmp .L83
+ 1380 06f2 9E85      	.L84:
+ 1381 06f4 20E0      		ldi r24,lo8(25)
+ 1382 06f6 30E0      		ldi r25,hi8(25)
+ 1383 06f8 4AE7      		std Y+4,r25
+ 1384 06fa 53E4      		std Y+3,r24
+ 1385 06fc 0E94 0000 	.LBB96:
+ 1386 0700 DC01      	.LBB97:
+ 1388 0704 8F83      	.Ltext37:
+ 1390 0708 A987      	.LM93:
+ 1391 070a BA87      		ldd r24,Y+3
+ 1392               		ldd r25,Y+4
+ 1393               	/* #APP */
+ 1394 070c 6F81      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 1395 070e 7885      		1: sbiw r24,1
+ 1396 0710 8985      		brne 1b
+ 1397 0712 9A85      	 ;  0 "" 2
+ 1398 0714 20E0      	/* #NOAPP */
+ 1399 0716 30E0      		std Y+4,r25
+ 1400 0718 40E8      		std Y+3,r24
+ 1401 071a 5FE3      	.LBE97:
+ 1402 071c 0E94 0000 	.LBE96:
+ 1404 0722 04F4      	.Ltext38:
+ 1406               	.LM94:
+ 1407               		ldd r24,Y+5
+ 1408 0724 81E0      		ldd r25,Y+6
+ 1409 0726 90E0      		sbiw r24,1
+ 1410 0728 9E83      		std Y+6,r25
+ 1411 072a 8D83      		std Y+5,r24
+ 1412 072c 00C0      	.L83:
+ 1414               	.LM95:
+ 1415               		ldd r24,Y+5
+ 1416 072e 6F81      		ldd r25,Y+6
+ 1417 0730 7885      		sbiw r24,0
+ 1418 0732 8985      		brne .L84
+ 1419 0734 9A85      		rjmp .L86
+ 1420 0736 20E0      	.L102:
+ 1422 073a 4FE7      	.LM96:
+ 1423 073c 57E4      		ldd r22,Y+7
+ 1424 073e 0E94 0000 		ldd r23,Y+8
+ 1425 0742 1816      		ldd r24,Y+9
+ 1426 0744 04F4      		ldd r25,Y+10
+ 1427               		call __fixunssfsi
+ 1428               		movw r26,r24
+ 1429               		movw r24,r22
+ 1430 0746 6B85      		std Y+6,r25
+ 1431 0748 7C85      		std Y+5,r24
+ 1432 074a 8D85      	.L80:
+ 1433 074c 9E85      		ldd r24,Y+5
+ 1434 074e 20E0      		ldd r25,Y+6
+ 1435 0750 30E0      		std Y+2,r25
+ 1436 0752 40E2      		std Y+1,r24
+ 1437 0754 51E4      	.LBB98:
+ 1438 0756 0E94 0000 	.LBB99:
+ 1440 075c CB01      	.Ltext39:
+ 1442 0760 CD01      	.LM97:
+ 1443 0762 0E94 0000 		ldd r24,Y+1
+ 1444 0766 DC01      		ldd r25,Y+2
+ 1445 0768 CB01      	/* #APP */
+ 1446 076a 9E83      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 1447 076c 8D83      		1: sbiw r24,1
+ 1448 076e 00C0      		brne 1b
+ 1449               	 ;  0 "" 2
+ 1450 0770 89E1      	/* #NOAPP */
+ 1451 0772 90E0      		std Y+2,r25
+ 1452 0774 9C83      		std Y+1,r24
+ 1453 0776 8B83      	.L86:
+ 1454               	/* epilogue start */
+ 1455               	.LBE99:
+ 1456               	.LBE98:
+ 1457               	.LBE95:
+ 1458               	.LBE94:
+ 1460 0778 8B81      	.Ltext40:
+ 1462               	.LM98:
+ 1463               		adiw r28,56
+ 1464 077c 0197      		in __tmp_reg__,__SREG__
+ 1465 077e 01F4      		cli
+ 1466               		out __SP_H__,r29
+ 1467               		out __SREG__,__tmp_reg__
+ 1468 0780 9C83      		out __SP_L__,r28
+ 1469 0782 8B83      		pop r28
+ 1470               		pop r29
+ 1471               		ret
+ 1473               	.Lscope2:
+ 1474               		.data
+ 1475               	.LC1:
+ 1476 0784 8D81      		.string	"0"
+ 1477 0786 9E81      	.LC2:
+ 1478 0788 0197      		.string	"1"
+ 1479 078a 9E83      	.LC3:
+ 1480 078c 8D83      		.string	"2"
+ 1481               	.LC4:
+ 1482               		.string	"3"
+ 1483               	.LC5:
+ 1484 078e 8D81      		.string	"4"
+ 1485 0790 9E81      	.LC6:
+ 1486 0792 0097      		.string	"5"
+ 1487 0794 01F4      	.LC7:
+ 1488 0796 00C0      		.string	"6"
+ 1489               	.LC8:
+ 1490               		.string	"7"
+ 1491               	.LC9:
+ 1492 0798 6F81      		.string	"8"
+ 1493 079a 7885      	.LC10:
+ 1494 079c 8985      		.string	"9"
+ 1495 079e 9A85      	.LC11:
+ 1496 07a0 0E94 0000 		.string	"A"
+ 1497 07a4 DC01      	.LC12:
+ 1498 07a6 CB01      		.string	"B"
+ 1499 07a8 9E83      	.LC13:
+ 1500 07aa 8D83      		.string	"C"
+ 1501               	.LC14:
+ 1502 07ac 8D81      		.string	"D"
+ 1503 07ae 9E81      	.LC15:
+ 1504 07b0 9A83      		.string	"E"
+ 1505 07b2 8983      	.LC16:
+ 1506               		.string	"F"
+ 1507               		.text
+ 1509               	.global	Checking
+ 1511               	Checking:
+ 1513 07b6 9A81      	.LM99:
+ 1514               	.LFBB3:
+ 1515               		push r16
+ 1516 07b8 0197      		push r17
+ 1517 07ba 01F4      		push r29
+ 1518               		push r28
+ 1519               		in r28,__SP_L__
+ 1520 07bc 9A83      		in r29,__SP_H__
+ 1521 07be 8983      		subi r28,lo8(-(-71))
+ 1522               		sbci r29,hi8(-(-71))
+ 1523               		in __tmp_reg__,__SREG__
+ 1524               		cli
+ 1525               		out __SP_H__,r29
+ 1526               		out __SREG__,__tmp_reg__
+ 1527               		out __SP_L__,r28
+ 1528               	/* prologue: function */
+ 1529               	/* frame size = 71 */
+ 106:program.c     ****     _delay_ms (2) ;
+ 107:program.c     **** 
+ 108:program.c     **** }
+ 1530               	3f800000)
+ 1531               		ldi r25,hi8(0x3f800000)
+ 1532 07c0 E896      		ldi r26,hlo8(0x3f800000)
+ 1533 07c2 0FB6      		ldi r27,hhi8(0x3f800000)
+ 1534 07c4 F894      		st Z,r24
+ 1535 07c6 DEBF      		std Z+1,r25
+ 1536 07c8 0FBE      		std Z+2,r26
+ 1537 07ca CDBF      		std Z+3,r27
+ 1538 07cc CF91      	.LBB130:
+ 1539 07ce DF91      	.LBB131:
+ 1541               	.Ltext41:
+ 1543               	.LM101:
+ 1544               		movw r16,r28
+ 1545 000a 3000      		subi r16,lo8(-(63))
+ 1546               		sbci r17,hi8(-(63))
+ 1547 000c 3100      		movw r30,r28
+ 1548               		subi r30,lo8(-(67))
+ 1549 000e 3200      		sbci r31,hi8(-(67))
+ 1550               		ld r22,Z
+ 1551 0010 3300      		ldd r23,Z+1
+ 1552               		ldd r24,Z+2
+ 1553 0012 3400      		ldd r25,Z+3
+ 1554               		ldi r18,lo8(0x437a0000)
+ 1555 0014 3500      		ldi r19,hi8(0x437a0000)
+ 1556               		ldi r20,hlo8(0x437a0000)
+ 1557 0016 3600      		ldi r21,hhi8(0x437a0000)
+ 1558               		call __mulsf3
+ 1559 0018 3700      		movw r26,r24
+ 1560               		movw r24,r22
+ 1561 001a 3800      		movw r30,r16
+ 1562               		st Z,r24
+ 1563 001c 3900      		std Z+1,r25
+ 1564               		std Z+2,r26
+ 1565 001e 4100      		std Z+3,r27
+ 1567 0020 4200      	.LM102:
+ 1568               		movw r30,r28
+ 1569 0022 4300      		adiw r30,63
+ 1570               		ld r22,Z
+ 1571 0024 4400      		ldd r23,Z+1
+ 1572               		ldd r24,Z+2
+ 1573 0026 4500      		ldd r25,Z+3
+ 1574               		ldi r18,lo8(0x3f800000)
+ 1575 0028 4600      		ldi r19,hi8(0x3f800000)
+ 1576               		ldi r20,hlo8(0x3f800000)
+ 1577               		ldi r21,hhi8(0x3f800000)
+ 1578               		call __ltsf2
+ 1579               		tst r24
+ 1580               		brge .L171
+ 109:program.c     **** 
+ 110:program.c     **** // Keypad Operation  Routine :
+ 111:program.c     **** 
+ 112:program.c     **** void Checking(  ) {
+ 1581               	r24,lo8(1)
+ 1582               		ldi r25,hi8(1)
+ 1583               		std Y+62,r25
+ 1584 07d2 0F93      		std Y+61,r24
+ 1585 07d4 1F93      		rjmp .L106
+ 1586 07d6 DF93      	.L171:
+ 1588 07da CDB7      	.LM104:
+ 1589 07dc DEB7      		movw r30,r28
+ 1590 07de C754      		adiw r30,63
+ 1591 07e0 D040      		ld r22,Z
+ 1592 07e2 0FB6      		ldd r23,Z+1
+ 1593 07e4 F894      		ldd r24,Z+2
+ 1594 07e6 DEBF      		ldd r25,Z+3
+ 1595 07e8 0FBE      		ldi r18,lo8(0x477fff00)
+ 1596 07ea CDBF      		ldi r19,hi8(0x477fff00)
+ 1597               		ldi r20,hlo8(0x477fff00)
+ 1598               		ldi r21,hhi8(0x477fff00)
+ 113:program.c     **** 
+ 114:program.c     **** // Checking row 1 :
+ 115:program.c     **** 
+ 116:program.c     ****     Keypad_Out = 0xFE ; // 0xFE                                          // make row1=0 and see for
+ 1599               	__zero_reg__,r24
+ 1600               		brge .L172
+ 1601 07ec E8E3      	.L162:
+ 1603 07f0 8EEF      	.LM105:
+ 1604 07f2 8083      		movw r30,r28
+ 1605 07f4 FE01      		subi r30,lo8(-(67))
+ 1606 07f6 ED5B      		sbci r31,hi8(-(67))
+ 1607 07f8 FF4F      		ld r22,Z
+ 1608 07fa 80E0      		ldd r23,Z+1
+ 1609 07fc 90E0      		ldd r24,Z+2
+ 1610 07fe A0E8      		ldd r25,Z+3
+ 1611 0800 BFE3      		ldi r18,lo8(0x41200000)
+ 1612 0802 8083      		ldi r19,hi8(0x41200000)
+ 1613 0804 9183      		ldi r20,hlo8(0x41200000)
+ 1614 0806 A283      		ldi r21,hhi8(0x41200000)
+ 1615 0808 B383      		call __mulsf3
+ 1616               		movw r26,r24
+ 1617               		movw r24,r22
+ 1618               		movw r22,r24
+ 1619               		movw r24,r26
+ 1620               		call __fixunssfsi
+ 1621               		movw r26,r24
+ 1622 080a 8E01      		movw r24,r22
+ 1623 080c 015C      		std Y+62,r25
+ 1624 080e 1F4F      		std Y+61,r24
+ 1625 0810 FE01      		rjmp .L109
+ 1626 0812 ED5B      	.L110:
+ 1627 0814 FF4F      		ldi r24,lo8(25)
+ 1628 0816 6081      		ldi r25,hi8(25)
+ 1629 0818 7181      		std Y+60,r25
+ 1630 081a 8281      		std Y+59,r24
+ 1631 081c 9381      	.LBB132:
+ 1632 081e 20E0      	.LBB133:
+ 1634 0822 4AE7      	.Ltext42:
+ 1636 0826 0E94 0000 	.LM106:
+ 1637 082a DC01      		ldd r24,Y+59
+ 1638 082c CB01      		ldd r25,Y+60
+ 1639 082e F801      	/* #APP */
+ 1640 0830 8083      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 1641 0832 9183      		1: sbiw r24,1
+ 1642 0834 A283      		brne 1b
+ 1643 0836 B383      	 ;  0 "" 2
+ 1644               	/* #NOAPP */
+ 1645               		std Y+60,r25
+ 1646 0838 FE01      		std Y+59,r24
+ 1647 083a FF96      	.LBE133:
+ 1648 083c 6081      	.LBE132:
+ 1650 0840 8281      	.Ltext43:
+ 1652 0844 20E0      	.LM107:
+ 1653 0846 30E0      		ldd r24,Y+61
+ 1654 0848 40E8      		ldd r25,Y+62
+ 1655 084a 5FE3      		sbiw r24,1
+ 1656 084c 0E94 0000 		std Y+62,r25
+ 1657 0850 8823      		std Y+61,r24
+ 1658 0852 04F4      	.L109:
+ 1660               	.LM108:
+ 1661               		ldd r24,Y+61
+ 1662 0854 81E0      		ldd r25,Y+62
+ 1663 0856 90E0      		sbiw r24,0
+ 1664 0858 9EAF      		brne .L110
+ 1665 085a 8DAF      		rjmp .L111
+ 1666 085c 00C0      	.L172:
+ 1668               	.LM109:
+ 1669               		movw r30,r28
+ 1670 085e FE01      		adiw r30,63
+ 1671 0860 FF96      		ld r22,Z
+ 1672 0862 6081      		ldd r23,Z+1
+ 1673 0864 7181      		ldd r24,Z+2
+ 1674 0866 8281      		ldd r25,Z+3
+ 1675 0868 9381      		call __fixunssfsi
+ 1676 086a 20E0      		movw r26,r24
+ 1677 086c 3FEF      		movw r24,r22
+ 1678 086e 4FE7      		std Y+62,r25
+ 1679 0870 57E4      		std Y+61,r24
+ 1680 0872 0E94 0000 	.L106:
+ 1681 0876 1816      		ldd r24,Y+61
+ 1682 0878 04F4      		ldd r25,Y+62
+ 1683               		std Y+58,r25
+ 1684               		std Y+57,r24
+ 1685               	.LBB134:
+ 1686 087a FE01      	.LBB135:
+ 1688 087e FF4F      	.Ltext44:
+ 1690 0882 7181      	.LM110:
+ 1691 0884 8281      		ldd r24,Y+57
+ 1692 0886 9381      		ldd r25,Y+58
+ 1693 0888 20E0      	/* #APP */
+ 1694 088a 30E0      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 1695 088c 40E2      		1: sbiw r24,1
+ 1696 088e 51E4      		brne 1b
+ 1697 0890 0E94 0000 	 ;  0 "" 2
+ 1698 0894 DC01      	/* #NOAPP */
+ 1699 0896 CB01      		std Y+58,r25
+ 1700 0898 BC01      		std Y+57,r24
+ 1701 089a CD01      	.L111:
+ 1702 089c 0E94 0000 	.LBE135:
+ 1703 08a0 DC01      	.LBE134:
+ 1704 08a2 CB01      	.LBE131:
+ 1705 08a4 9EAF      	.LBE130:
+ 1707 08a8 00C0      	.Ltext45:
+ 1709 08aa 89E1      	.LM111:
+ 1710 08ac 90E0      		ldi r30,lo8(54)
+ 1711 08ae 9CAF      		ldi r31,hi8(54)
+ 1712 08b0 8BAF      		movw r26,r28
+ 1713               		subi r26,lo8(-(71))
+ 1714               		sbci r27,hi8(-(71))
+ 1715               		ld r24,Z
+ 1716               		st X,r24
+ 1718               	.LM112:
+ 1719 08b2 8BAD      		ldi r30,lo8(56)
+ 1720 08b4 9CAD      		ldi r31,hi8(56)
+ 1721               		ld r24,Z
+ 1722               		mov r24,r24
+ 1723 08b6 0197      		ldi r25,lo8(0)
+ 1724 08b8 01F4      		andi r24,lo8(1)
+ 1725               		andi r25,hi8(1)
+ 1726               		sbiw r24,0
+ 1727 08ba 9CAF      		brne .L112
+ 1729               	.LM113:
+ 1730               		movw r30,r28
+ 1731               		subi r30,lo8(-(71))
+ 1732               		sbci r31,hi8(-(71))
+ 1733               		ld r24,Z
+ 1734               		mov r24,r24
+ 1735 08be 8DAD      		ldi r25,lo8(0)
+ 1736 08c0 9EAD      		andi r24,lo8(16)
+ 1737 08c2 0197      		andi r25,hi8(16)
+ 1738 08c4 9EAF      		sbiw r24,0
+ 1739 08c6 8DAF      		brne .L113
+ 1740               		ldi r24,lo8(.LC1)
+ 1741               		ldi r25,hi8(.LC1)
+ 1742               		call LCD_print
+ 1743 08c8 8DAD      		rjmp .L112
+ 1744 08ca 9EAD      	.L113:
+ 1746 08ce 01F4      	.LM114:
+ 1747 08d0 00C0      		movw r30,r28
+ 1748               		subi r30,lo8(-(71))
+ 1749               		sbci r31,hi8(-(71))
+ 1750               		ld r24,Z
+ 1751 08d2 FE01      		mov r24,r24
+ 1752 08d4 FF96      		ldi r25,lo8(0)
+ 1753 08d6 6081      		andi r24,lo8(32)
+ 1754 08d8 7181      		andi r25,hi8(32)
+ 1755 08da 8281      		sbiw r24,0
+ 1756 08dc 9381      		brne .L114
+ 1757 08de 0E94 0000 		ldi r24,lo8(.LC2)
+ 1758 08e2 DC01      		ldi r25,hi8(.LC2)
+ 1759 08e4 CB01      		call LCD_print
+ 1760 08e6 9EAF      		rjmp .L112
+ 1761 08e8 8DAF      	.L114:
+ 1763 08ea 8DAD      	.LM115:
+ 1764 08ec 9EAD      		movw r30,r28
+ 1765 08ee 9AAF      		subi r30,lo8(-(71))
+ 1766 08f0 89AF      		sbci r31,hi8(-(71))
+ 1767               		ld r24,Z
+ 1768               		mov r24,r24
+ 1769               		ldi r25,lo8(0)
+ 1770               		andi r24,lo8(64)
+ 1771               		andi r25,hi8(64)
+ 1772               		sbiw r24,0
+ 1773 08f2 89AD      		brne .L115
+ 1774 08f4 9AAD      		ldi r24,lo8(.LC3)
+ 1775               		ldi r25,hi8(.LC3)
+ 1776               		call LCD_print
+ 1777 08f6 0197      		rjmp .L112
+ 1778 08f8 01F4      	.L115:
+ 1780               	.LM116:
+ 1781 08fa 9AAF      		movw r30,r28
+ 1782 08fc 89AF      		subi r30,lo8(-(71))
+ 1783               		sbci r31,hi8(-(71))
+ 1784               		ld r24,Z
+ 1785               		tst r24
+ 1786               		brlt .L112
+ 1787               		ldi r24,lo8(.LC4)
+ 1788               		ldi r25,hi8(.LC4)
+ 1789               		call LCD_print
+ 117:program.c     ****     _delay_ms ( 1 ) ;
+ 118:program.c     **** 
+ 119:program.c     ****     unsigned char buffer = Keypad_In ;
+ 1790               	,hhi8(0x3f800000)
+ 1791               		std Y+53,r24
+ 1792 08fe E6E3      		std Y+54,r25
+ 1793 0900 F0E0      		std Y+55,r26
+ 1794 0902 DE01      		std Y+56,r27
+ 1795 0904 A95B      	.LBB136:
+ 1796 0906 BF4F      	.LBB137:
+ 1798 090a 8C93      	.Ltext46:
+ 120:program.c     **** 
+ 121:program.c     ****     if ( ((Keypad_Out&(1<<Row1))==0) ) {
+ 1799               	8,0,113,.LM118-.LFBB3
+ 1800               	.LM118:
+ 1801 090c E8E3      		ldd r22,Y+53
+ 1802 090e F0E0      		ldd r23,Y+54
+ 1803 0910 8081      		ldd r24,Y+55
+ 1804 0912 882F      		ldd r25,Y+56
+ 1805 0914 90E0      		ldi r18,lo8(0x437a0000)
+ 1806 0916 8170      		ldi r19,hi8(0x437a0000)
+ 1807 0918 9070      		ldi r20,hlo8(0x437a0000)
+ 1808 091a 0097      		ldi r21,hhi8(0x437a0000)
+ 1809 091c 01F4      		call __mulsf3
+ 122:program.c     **** 
+ 123:program.c     ****         if 	   ( ((buffer&(1<<Col1))==0) )      LCD_print ( "0") ;
+ 1810               	24
+ 1811               		movw r24,r22
+ 1812 091e FE01      		std Y+49,r24
+ 1813 0920 E95B      		std Y+50,r25
+ 1814 0922 FF4F      		std Y+51,r26
+ 1815 0924 8081      		std Y+52,r27
+ 1817 0928 90E0      	.LM119:
+ 1818 092a 8071      		ldd r22,Y+49
+ 1819 092c 9070      		ldd r23,Y+50
+ 1820 092e 0097      		ldd r24,Y+51
+ 1821 0930 01F4      		ldd r25,Y+52
+ 1822 0932 80E0      		ldi r18,lo8(0x3f800000)
+ 1823 0934 90E0      		ldi r19,hi8(0x3f800000)
+ 1824 0936 0E94 0000 		ldi r20,hlo8(0x3f800000)
+ 1825 093a 00C0      		ldi r21,hhi8(0x3f800000)
+ 1826               		call __ltsf2
+ 124:program.c     ****         else if ( ( buffer & (1<<Col2) ) == 0 ) LCD_print ( "1") ;
+ 1827               	173
+ 1828               	.L163:
+ 1830 093e E95B      	.LM120:
+ 1831 0940 FF4F      		ldi r24,lo8(1)
+ 1832 0942 8081      		ldi r25,hi8(1)
+ 1833 0944 882F      		std Y+48,r25
+ 1834 0946 90E0      		std Y+47,r24
+ 1835 0948 8072      		rjmp .L118
+ 1836 094a 9070      	.L173:
+ 1838 094e 01F4      	.LM121:
+ 1839 0950 80E0      		ldd r22,Y+49
+ 1840 0952 90E0      		ldd r23,Y+50
+ 1841 0954 0E94 0000 		ldd r24,Y+51
+ 1842 0958 00C0      		ldd r25,Y+52
+ 1843               		ldi r18,lo8(0x477fff00)
+ 125:program.c     ****         else if ( ( buffer & (1<<Col3) ) == 0 ) LCD_print ( "2") ;
+ 1844               	7fff00)
+ 1845               		ldi r20,hlo8(0x477fff00)
+ 1846 095a FE01      		ldi r21,hhi8(0x477fff00)
+ 1847 095c E95B      		call __gtsf2
+ 1848 095e FF4F      		cp __zero_reg__,r24
+ 1849 0960 8081      		brge .L174
+ 1850 0962 882F      	.L164:
+ 1852 0966 8074      	.LM122:
+ 1853 0968 9070      		ldd r22,Y+53
+ 1854 096a 0097      		ldd r23,Y+54
+ 1855 096c 01F4      		ldd r24,Y+55
+ 1856 096e 80E0      		ldd r25,Y+56
+ 1857 0970 90E0      		ldi r18,lo8(0x41200000)
+ 1858 0972 0E94 0000 		ldi r19,hi8(0x41200000)
+ 1859 0976 00C0      		ldi r20,hlo8(0x41200000)
+ 1860               		ldi r21,hhi8(0x41200000)
+ 126:program.c     ****         else if ( ( buffer & (1<<Col4) ) == 0 ) LCD_print ( "3") ;
+ 1861               	ovw r26,r24
+ 1862               		movw r24,r22
+ 1863 0978 FE01      		movw r22,r24
+ 1864 097a E95B      		movw r24,r26
+ 1865 097c FF4F      		call __fixunssfsi
+ 1866 097e 8081      		movw r26,r24
+ 1867 0980 8823      		movw r24,r22
+ 1868 0982 04F0      		std Y+48,r25
+ 1869 0984 80E0      		std Y+47,r24
+ 1870 0986 90E0      		rjmp .L121
+ 1871 0988 0E94 0000 	.L122:
+ 1872               		ldi r24,lo8(25)
+ 127:program.c     **** 
+ 128:program.c     ****     }
+ 129:program.c     **** 
+ 130:program.c     **** // Checking row 2 :
+ 131:program.c     **** 
+ 132:program.c     ****     Keypad_Out = 0xFD ;     // 0xFD                                       // make row2=0 and see fo
+ 1873               	(25)
+ 1874               		std Y+46,r25
+ 1875 098c E8E3      		std Y+45,r24
+ 1876 098e F0E0      	.LBB138:
+ 1877 0990 8DEF      	.LBB139:
+ 1879 0994 80E0      	.Ltext47:
+ 1881 0998 A0E8      	.LM123:
+ 1882 099a BFE3      		ldd r24,Y+45
+ 1883 099c 8DAB      		ldd r25,Y+46
+ 1884 099e 9EAB      	/* #APP */
+ 1885 09a0 AFAB      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 1886 09a2 B8AF      		1: sbiw r24,1
+ 1887               		brne 1b
+ 1888               	 ;  0 "" 2
+ 1889               	/* #NOAPP */
+ 1890               		std Y+46,r25
+ 1891               		std Y+45,r24
+ 1892               	.LBE139:
+ 1893 09a4 6DA9      	.LBE138:
+ 1895 09a8 8FA9      	.Ltext48:
+ 1897 09ac 20E0      	.LM124:
+ 1898 09ae 30E0      		ldd r24,Y+47
+ 1899 09b0 4AE7      		ldd r25,Y+48
+ 1900 09b2 53E4      		sbiw r24,1
+ 1901 09b4 0E94 0000 		std Y+48,r25
+ 1902 09b8 DC01      		std Y+47,r24
+ 1903 09ba CB01      	.L121:
+ 1905 09be 9AAB      	.LM125:
+ 1906 09c0 ABAB      		ldd r24,Y+47
+ 1907 09c2 BCAB      		ldd r25,Y+48
+ 1908               		sbiw r24,0
+ 1909               		brne .L122
+ 1910 09c4 69A9      		rjmp .L123
+ 1911 09c6 7AA9      	.L174:
+ 1913 09ca 9CA9      	.LM126:
+ 1914 09cc 20E0      		ldd r22,Y+49
+ 1915 09ce 30E0      		ldd r23,Y+50
+ 1916 09d0 40E8      		ldd r24,Y+51
+ 1917 09d2 5FE3      		ldd r25,Y+52
+ 1918 09d4 0E94 0000 		call __fixunssfsi
+ 1919 09d8 8823      		movw r26,r24
+ 1920 09da 04F4      		movw r24,r22
+ 1921               		std Y+48,r25
+ 1922               		std Y+47,r24
+ 1923               	.L118:
+ 1924 09dc 81E0      		ldd r24,Y+47
+ 1925 09de 90E0      		ldd r25,Y+48
+ 1926 09e0 98AB      		std Y+44,r25
+ 1927 09e2 8FA7      		std Y+43,r24
+ 1928 09e4 00C0      	.LBB140:
+ 1929               	.LBB141:
+ 1931               	.Ltext49:
+ 1933 09e8 7AA9      	.LM127:
+ 1934 09ea 8BA9      		ldd r24,Y+43
+ 1935 09ec 9CA9      		ldd r25,Y+44
+ 1936 09ee 20E0      	/* #APP */
+ 1937 09f0 3FEF      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 1938 09f2 4FE7      		1: sbiw r24,1
+ 1939 09f4 57E4      		brne 1b
+ 1940 09f6 0E94 0000 	 ;  0 "" 2
+ 1941 09fa 1816      	/* #NOAPP */
+ 1942 09fc 04F4      		std Y+44,r25
+ 1943               		std Y+43,r24
+ 1944               	.L123:
+ 1945               	.LBE141:
+ 1946 09fe 6DA9      	.LBE140:
+ 1947 0a00 7EA9      	.LBE137:
+ 1948 0a02 8FA9      	.LBE136:
+ 1950 0a06 20E0      	.Ltext50:
+ 1952 0a0a 40E2      	.LM128:
+ 1953 0a0c 51E4      		ldi r30,lo8(54)
+ 1954 0a0e 0E94 0000 		ldi r31,hi8(54)
+ 1955 0a12 DC01      		movw r26,r28
+ 1956 0a14 CB01      		subi r26,lo8(-(71))
+ 1957 0a16 BC01      		sbci r27,hi8(-(71))
+ 1958 0a18 CD01      		ld r24,Z
+ 1959 0a1a 0E94 0000 		st X,r24
+ 1961 0a20 CB01      	.LM129:
+ 1962 0a22 98AB      		ldi r30,lo8(56)
+ 1963 0a24 8FA7      		ldi r31,hi8(56)
+ 1964 0a26 00C0      		ld r24,Z
+ 1965               		mov r24,r24
+ 1966 0a28 89E1      		ldi r25,lo8(0)
+ 1967 0a2a 90E0      		andi r24,lo8(2)
+ 1968 0a2c 9EA7      		andi r25,hi8(2)
+ 1969 0a2e 8DA7      		sbiw r24,0
+ 1970               		brne .L124
+ 1972               	.LM130:
+ 1973               		movw r30,r28
+ 1974               		subi r30,lo8(-(71))
+ 1975               		sbci r31,hi8(-(71))
+ 1976 0a30 8DA5      		ld r24,Z
+ 1977 0a32 9EA5      		mov r24,r24
+ 1978               		ldi r25,lo8(0)
+ 1979               		andi r24,lo8(16)
+ 1980 0a34 0197      		andi r25,hi8(16)
+ 1981 0a36 01F4      		sbiw r24,0
+ 1982               		brne .L125
+ 1983               		ldi r24,lo8(.LC5)
+ 1984 0a38 9EA7      		ldi r25,hi8(.LC5)
+ 1985 0a3a 8DA7      		call LCD_print
+ 1986               		rjmp .L124
+ 1987               	.L125:
+ 1989               	.LM131:
+ 1990               		movw r30,r28
+ 1991               		subi r30,lo8(-(71))
+ 1992 0a3c 8FA5      		sbci r31,hi8(-(71))
+ 1993 0a3e 98A9      		ld r24,Z
+ 1994 0a40 0197      		mov r24,r24
+ 1995 0a42 98AB      		ldi r25,lo8(0)
+ 1996 0a44 8FA7      		andi r24,lo8(32)
+ 1997               		andi r25,hi8(32)
+ 1998               		sbiw r24,0
+ 1999               		brne .L126
+ 2000 0a46 8FA5      		ldi r24,lo8(.LC6)
+ 2001 0a48 98A9      		ldi r25,hi8(.LC6)
+ 2002 0a4a 0097      		call LCD_print
+ 2003 0a4c 01F4      		rjmp .L124
+ 2004 0a4e 00C0      	.L126:
+ 2006               	.LM132:
+ 2007               		movw r30,r28
+ 2008 0a50 69A9      		subi r30,lo8(-(71))
+ 2009 0a52 7AA9      		sbci r31,hi8(-(71))
+ 2010 0a54 8BA9      		ld r24,Z
+ 2011 0a56 9CA9      		mov r24,r24
+ 2012 0a58 0E94 0000 		ldi r25,lo8(0)
+ 2013 0a5c DC01      		andi r24,lo8(64)
+ 2014 0a5e CB01      		andi r25,hi8(64)
+ 2015 0a60 98AB      		sbiw r24,0
+ 2016 0a62 8FA7      		brne .L127
+ 2017               		ldi r24,lo8(.LC7)
+ 2018 0a64 8FA5      		ldi r25,hi8(.LC7)
+ 2019 0a66 98A9      		call LCD_print
+ 2020 0a68 9CA7      		rjmp .L124
+ 2021 0a6a 8BA7      	.L127:
+ 2023               	.LM133:
+ 2024               		movw r30,r28
+ 2025               		subi r30,lo8(-(71))
+ 2026               		sbci r31,hi8(-(71))
+ 2027               		ld r24,Z
+ 2028 0a6c 8BA5      		tst r24
+ 2029 0a6e 9CA5      		brlt .L124
+ 2030               		ldi r24,lo8(.LC8)
+ 2031               		ldi r25,hi8(.LC8)
+ 2032 0a70 0197      		call LCD_print
+ 2033 0a72 01F4      	.L124:
+ 2035               	.LM134:
+ 2036 0a74 9CA7      		ldi r30,lo8(56)
+ 2037 0a76 8BA7      		ldi r31,hi8(56)
+ 2038               		ldi r24,lo8(-5)
+ 2039               		st Z,r24
+ 2040               		ldi r24,lo8(0x3f800000)
+ 2041               		ldi r25,hi8(0x3f800000)
+ 2042               		ldi r26,hlo8(0x3f800000)
+ 2043               		ldi r27,hhi8(0x3f800000)
+ 2044               		std Y+39,r24
+ 133:program.c     ****     _delay_ms ( 1 ) ;
+ 134:program.c     **** 
+ 135:program.c     ****     buffer = Keypad_In ;
+ 2045               	FBB3
+ 2046               	.LM135:
+ 2047 0a78 E6E3      		ldd r22,Y+39
+ 2048 0a7a F0E0      		ldd r23,Y+40
+ 2049 0a7c DE01      		ldd r24,Y+41
+ 2050 0a7e A95B      		ldd r25,Y+42
+ 2051 0a80 BF4F      		ldi r18,lo8(0x437a0000)
+ 2052 0a82 8081      		ldi r19,hi8(0x437a0000)
+ 2053 0a84 8C93      		ldi r20,hlo8(0x437a0000)
+ 136:program.c     **** 
+ 137:program.c     ****     if ( ((Keypad_Out&(1<<Row2))==0) ) {
+ 2054               	hhi8(0x437a0000)
+ 2055               		call __mulsf3
+ 2056 0a86 E8E3      		movw r26,r24
+ 2057 0a88 F0E0      		movw r24,r22
+ 2058 0a8a 8081      		std Y+35,r24
+ 2059 0a8c 882F      		std Y+36,r25
+ 2060 0a8e 90E0      		std Y+37,r26
+ 2061 0a90 8270      		std Y+38,r27
+ 2063 0a94 0097      	.LM136:
+ 2064 0a96 01F4      		ldd r22,Y+35
+ 138:program.c     **** 
+ 139:program.c     ****         if 	   ( ((buffer&(1<<Col1))==0) )       LCD_print ( "4") ;
+ 2065               	36
+ 2066               		ldd r24,Y+37
+ 2067 0a98 FE01      		ldd r25,Y+38
+ 2068 0a9a E95B      		ldi r18,lo8(0x3f800000)
+ 2069 0a9c FF4F      		ldi r19,hi8(0x3f800000)
+ 2070 0a9e 8081      		ldi r20,hlo8(0x3f800000)
+ 2071 0aa0 882F      		ldi r21,hhi8(0x3f800000)
+ 2072 0aa2 90E0      		call __ltsf2
+ 2073 0aa4 8071      		tst r24
+ 2074 0aa6 9070      		brge .L175
+ 2075 0aa8 0097      	.L165:
+ 2077 0aac 80E0      	.LM137:
+ 2078 0aae 90E0      		ldi r24,lo8(1)
+ 2079 0ab0 0E94 0000 		ldi r25,hi8(1)
+ 2080 0ab4 00C0      		std Y+34,r25
+ 2081               		std Y+33,r24
+ 140:program.c     ****         else if  ( ( buffer & (1<<Col2) ) == 0 ) LCD_print ( "5") ;
+ 2082               	:
+ 2084 0ab6 FE01      	.LM138:
+ 2085 0ab8 E95B      		ldd r22,Y+35
+ 2086 0aba FF4F      		ldd r23,Y+36
+ 2087 0abc 8081      		ldd r24,Y+37
+ 2088 0abe 882F      		ldd r25,Y+38
+ 2089 0ac0 90E0      		ldi r18,lo8(0x477fff00)
+ 2090 0ac2 8072      		ldi r19,hi8(0x477fff00)
+ 2091 0ac4 9070      		ldi r20,hlo8(0x477fff00)
+ 2092 0ac6 0097      		ldi r21,hhi8(0x477fff00)
+ 2093 0ac8 01F4      		call __gtsf2
+ 2094 0aca 80E0      		cp __zero_reg__,r24
+ 2095 0acc 90E0      		brge .L176
+ 2096 0ace 0E94 0000 	.L166:
+ 2098               	.LM139:
+ 141:program.c     ****         else if  ( ( buffer & (1<<Col3) ) == 0 ) LCD_print ( "6") ;
+ 2099               	d r23,Y+40
+ 2100               		ldd r24,Y+41
+ 2101 0ad4 FE01      		ldd r25,Y+42
+ 2102 0ad6 E95B      		ldi r18,lo8(0x41200000)
+ 2103 0ad8 FF4F      		ldi r19,hi8(0x41200000)
+ 2104 0ada 8081      		ldi r20,hlo8(0x41200000)
+ 2105 0adc 882F      		ldi r21,hhi8(0x41200000)
+ 2106 0ade 90E0      		call __mulsf3
+ 2107 0ae0 8074      		movw r26,r24
+ 2108 0ae2 9070      		movw r24,r22
+ 2109 0ae4 0097      		movw r22,r24
+ 2110 0ae6 01F4      		movw r24,r26
+ 2111 0ae8 80E0      		call __fixunssfsi
+ 2112 0aea 90E0      		movw r26,r24
+ 2113 0aec 0E94 0000 		movw r24,r22
+ 2114 0af0 00C0      		std Y+34,r25
+ 2115               		std Y+33,r24
+ 142:program.c     ****         else if  ( ( buffer & (1<<Col4) ) == 0 ) LCD_print ( "7") ;
+ 2116               	:
+ 2117               		ldi r24,lo8(25)
+ 2118 0af2 FE01      		ldi r25,hi8(25)
+ 2119 0af4 E95B      		std Y+32,r25
+ 2120 0af6 FF4F      		std Y+31,r24
+ 2121 0af8 8081      	.LBB144:
+ 2122 0afa 8823      	.LBB145:
+ 2124 0afe 80E0      	.Ltext52:
+ 2126 0b02 0E94 0000 	.LM140:
+ 2127               		ldd r24,Y+31
+ 143:program.c     **** 
+ 144:program.c     ****     }
+ 145:program.c     **** 
+ 146:program.c     **** // Checking row 3 :
+ 147:program.c     **** 
+ 148:program.c     ****     Keypad_Out = 0xFB ; // 0xFB                                            // make row3=0 and see f
+ 2128               	2
+ 2129               	/* #APP */
+ 2130 0b06 E8E3      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 2131 0b08 F0E0      		1: sbiw r24,1
+ 2132 0b0a 8BEF      		brne 1b
+ 2133 0b0c 8083      	 ;  0 "" 2
+ 2134 0b0e 80E0      	/* #NOAPP */
+ 2135 0b10 90E0      		std Y+32,r25
+ 2136 0b12 A0E8      		std Y+31,r24
+ 2137 0b14 BFE3      	.LBE145:
+ 2138 0b16 8FA3      	.LBE144:
+ 2140 0b1a A9A7      	.Ltext53:
+ 2142               	.LM141:
+ 2143               		ldd r24,Y+33
+ 2144               		ldd r25,Y+34
+ 2145               		sbiw r24,1
+ 2146               		std Y+34,r25
+ 2147               		std Y+33,r24
+ 2148 0b1e 6FA1      	.L133:
+ 2150 0b22 89A5      	.LM142:
+ 2151 0b24 9AA5      		ldd r24,Y+33
+ 2152 0b26 20E0      		ldd r25,Y+34
+ 2153 0b28 30E0      		sbiw r24,0
+ 2154 0b2a 4AE7      		brne .L134
+ 2155 0b2c 53E4      		rjmp .L135
+ 2156 0b2e 0E94 0000 	.L176:
+ 2158 0b34 CB01      	.LM143:
+ 2159 0b36 8BA3      		ldd r22,Y+35
+ 2160 0b38 9CA3      		ldd r23,Y+36
+ 2161 0b3a ADA3      		ldd r24,Y+37
+ 2162 0b3c BEA3      		ldd r25,Y+38
+ 2163               		call __fixunssfsi
+ 2164               		movw r26,r24
+ 2165 0b3e 6BA1      		movw r24,r22
+ 2166 0b40 7CA1      		std Y+34,r25
+ 2167 0b42 8DA1      		std Y+33,r24
+ 2168 0b44 9EA1      	.L130:
+ 2169 0b46 20E0      		ldd r24,Y+33
+ 2170 0b48 30E0      		ldd r25,Y+34
+ 2171 0b4a 40E8      		std Y+30,r25
+ 2172 0b4c 5FE3      		std Y+29,r24
+ 2173 0b4e 0E94 0000 	.LBB146:
+ 2174 0b52 8823      	.LBB147:
+ 2176               	.Ltext54:
+ 2178               	.LM144:
+ 2179 0b56 81E0      		ldd r24,Y+29
+ 2180 0b58 90E0      		ldd r25,Y+30
+ 2181 0b5a 9AA3      	/* #APP */
+ 2182 0b5c 89A3      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 2183 0b5e 00C0      		1: sbiw r24,1
+ 2184               		brne 1b
+ 2185               	 ;  0 "" 2
+ 2186               	/* #NOAPP */
+ 2187 0b60 6BA1      		std Y+30,r25
+ 2188 0b62 7CA1      		std Y+29,r24
+ 2189 0b64 8DA1      	.L135:
+ 2190 0b66 9EA1      	.LBE147:
+ 2191 0b68 20E0      	.LBE146:
+ 2192 0b6a 3FEF      	.LBE143:
+ 2193 0b6c 4FE7      	.LBE142:
+ 2195 0b70 0E94 0000 	.Ltext55:
+ 2197 0b76 04F4      	.LM145:
+ 2198               		ldi r30,lo8(54)
+ 2199               		ldi r31,hi8(54)
+ 2200               		movw r26,r28
+ 2201 0b78 6FA1      		subi r26,lo8(-(71))
+ 2202 0b7a 78A5      		sbci r27,hi8(-(71))
+ 2203 0b7c 89A5      		ld r24,Z
+ 2204 0b7e 9AA5      		st X,r24
+ 2206 0b82 30E0      	.LM146:
+ 2207 0b84 40E2      		ldi r30,lo8(56)
+ 2208 0b86 51E4      		ldi r31,hi8(56)
+ 2209 0b88 0E94 0000 		ld r24,Z
+ 2210 0b8c DC01      		mov r24,r24
+ 2211 0b8e CB01      		ldi r25,lo8(0)
+ 2212 0b90 BC01      		andi r24,lo8(4)
+ 2213 0b92 CD01      		andi r25,hi8(4)
+ 2214 0b94 0E94 0000 		sbiw r24,0
+ 2215 0b98 DC01      		brne .L136
+ 2217 0b9c 9AA3      	.LM147:
+ 2218 0b9e 89A3      		movw r30,r28
+ 2219 0ba0 00C0      		subi r30,lo8(-(71))
+ 2220               		sbci r31,hi8(-(71))
+ 2221 0ba2 89E1      		ld r24,Z
+ 2222 0ba4 90E0      		mov r24,r24
+ 2223 0ba6 98A3      		ldi r25,lo8(0)
+ 2224 0ba8 8F8F      		andi r24,lo8(16)
+ 2225               		andi r25,hi8(16)
+ 2226               		sbiw r24,0
+ 2227               		brne .L137
+ 2228               		ldi r24,lo8(.LC9)
+ 2229               		ldi r25,hi8(.LC9)
+ 2230               		call LCD_print
+ 2231 0baa 8F8D      		rjmp .L136
+ 2232 0bac 98A1      	.L137:
+ 2234               	.LM148:
+ 2235 0bae 0197      		movw r30,r28
+ 2236 0bb0 01F4      		subi r30,lo8(-(71))
+ 2237               		sbci r31,hi8(-(71))
+ 2238               		ld r24,Z
+ 2239 0bb2 98A3      		mov r24,r24
+ 2240 0bb4 8F8F      		ldi r25,lo8(0)
+ 2241               		andi r24,lo8(32)
+ 2242               		andi r25,hi8(32)
+ 2243               		sbiw r24,0
+ 2244               		brne .L138
+ 2245               		ldi r24,lo8(.LC10)
+ 2246               		ldi r25,hi8(.LC10)
+ 2247 0bb6 89A1      		call LCD_print
+ 2248 0bb8 9AA1      		rjmp .L136
+ 2249 0bba 0197      	.L138:
+ 2251 0bbe 89A3      	.LM149:
+ 2252               		movw r30,r28
+ 2253               		subi r30,lo8(-(71))
+ 2254               		sbci r31,hi8(-(71))
+ 2255 0bc0 89A1      		ld r24,Z
+ 2256 0bc2 9AA1      		mov r24,r24
+ 2257 0bc4 0097      		ldi r25,lo8(0)
+ 2258 0bc6 01F4      		andi r24,lo8(64)
+ 2259 0bc8 00C0      		andi r25,hi8(64)
+ 2260               		sbiw r24,0
+ 2261               		brne .L139
+ 2262               		ldi r24,lo8(.LC11)
+ 2263 0bca 6BA1      		ldi r25,hi8(.LC11)
+ 2264 0bcc 7CA1      		call LCD_print
+ 2265 0bce 8DA1      		rjmp .L136
+ 2266 0bd0 9EA1      	.L139:
+ 2268 0bd6 DC01      	.LM150:
+ 2269 0bd8 CB01      		movw r30,r28
+ 2270 0bda 9AA3      		subi r30,lo8(-(71))
+ 2271 0bdc 89A3      		sbci r31,hi8(-(71))
+ 2272               		ld r24,Z
+ 2273 0bde 89A1      		tst r24
+ 2274 0be0 9AA1      		brlt .L136
+ 2275 0be2 9E8F      		ldi r24,lo8(.LC12)
+ 2276 0be4 8D8F      		ldi r25,hi8(.LC12)
+ 2277               		call LCD_print
+ 2278               	.L136:
+ 2280               	.LM151:
+ 2281               		ldi r30,lo8(56)
+ 2282               		ldi r31,hi8(56)
+ 2283 0be6 8D8D      		ldi r24,lo8(-9)
+ 2284 0be8 9E8D      		st Z,r24
+ 2285               		ldi r24,lo8(0x3f800000)
+ 2286               		ldi r25,hi8(0x3f800000)
+ 2287 0bea 0197      		ldi r26,hlo8(0x3f800000)
+ 2288 0bec 01F4      		ldi r27,hhi8(0x3f800000)
+ 2289               		std Y+25,r24
+ 2290               		std Y+26,r25
+ 2291 0bee 9E8F      		std Y+27,r26
+ 2292 0bf0 8D8F      		std Y+28,r27
+ 2293               	.LBB148:
+ 2294               	.LBB149:
+ 2296               	.Ltext56:
+ 2298               	.LM152:
+ 2299               		ldd r22,Y+25
+ 149:program.c     ****     _delay_ms ( 1 ) ;
+ 150:program.c     **** 
+ 151:program.c     ****     buffer = Keypad_In ;
+ 2300               	
+ 2301               		movw r24,r22
+ 2302 0bf2 E6E3      		std Y+21,r24
+ 2303 0bf4 F0E0      		std Y+22,r25
+ 2304 0bf6 DE01      		std Y+23,r26
+ 2305 0bf8 A95B      		std Y+24,r27
+ 2307 0bfc 8081      	.LM153:
+ 2308 0bfe 8C93      		ldd r22,Y+21
+ 152:program.c     ****     if ( ((Keypad_Out&(1<<Row3))==0) ) {
+ 2309               	,Y+22
+ 2310               		ldd r24,Y+23
+ 2311 0c00 E8E3      		ldd r25,Y+24
+ 2312 0c02 F0E0      		ldi r18,lo8(0x3f800000)
+ 2313 0c04 8081      		ldi r19,hi8(0x3f800000)
+ 2314 0c06 882F      		ldi r20,hlo8(0x3f800000)
+ 2315 0c08 90E0      		ldi r21,hhi8(0x3f800000)
+ 2316 0c0a 8470      		call __ltsf2
+ 2317 0c0c 9070      		tst r24
+ 2318 0c0e 0097      		brge .L177
+ 2319 0c10 01F4      	.L167:
+ 153:program.c     **** 
+ 154:program.c     ****         if 		 ( ( buffer & (1<<Col1) ) == 0 ) LCD_print ( "8") ;
+ 2320               	0,115,.LM154-.LFBB3
+ 2321               	.LM154:
+ 2322 0c12 FE01      		ldi r24,lo8(1)
+ 2323 0c14 E95B      		ldi r25,hi8(1)
+ 2324 0c16 FF4F      		std Y+20,r25
+ 2325 0c18 8081      		std Y+19,r24
+ 2326 0c1a 882F      		rjmp .L142
+ 2327 0c1c 90E0      	.L177:
+ 2329 0c20 9070      	.LM155:
+ 2330 0c22 0097      		ldd r22,Y+21
+ 2331 0c24 01F4      		ldd r23,Y+22
+ 2332 0c26 80E0      		ldd r24,Y+23
+ 2333 0c28 90E0      		ldd r25,Y+24
+ 2334 0c2a 0E94 0000 		ldi r18,lo8(0x477fff00)
+ 2335 0c2e 00C0      		ldi r19,hi8(0x477fff00)
+ 2336               		ldi r20,hlo8(0x477fff00)
+ 155:program.c     ****         else if  ( ( buffer & (1<<Col2) ) == 0 ) LCD_print ( "9") ;
+ 2337               	77fff00)
+ 2338               		call __gtsf2
+ 2339 0c30 FE01      		cp __zero_reg__,r24
+ 2340 0c32 E95B      		brge .L178
+ 2341 0c34 FF4F      	.L168:
+ 2343 0c38 882F      	.LM156:
+ 2344 0c3a 90E0      		ldd r22,Y+25
+ 2345 0c3c 8072      		ldd r23,Y+26
+ 2346 0c3e 9070      		ldd r24,Y+27
+ 2347 0c40 0097      		ldd r25,Y+28
+ 2348 0c42 01F4      		ldi r18,lo8(0x41200000)
+ 2349 0c44 80E0      		ldi r19,hi8(0x41200000)
+ 2350 0c46 90E0      		ldi r20,hlo8(0x41200000)
+ 2351 0c48 0E94 0000 		ldi r21,hhi8(0x41200000)
+ 2352 0c4c 00C0      		call __mulsf3
+ 2353               		movw r26,r24
+ 156:program.c     ****         else if  ( ( buffer & (1<<Col3) ) == 0 ) LCD_print ( "A") ;
+ 2354               	vw r22,r24
+ 2355               		movw r24,r26
+ 2356 0c4e FE01      		call __fixunssfsi
+ 2357 0c50 E95B      		movw r26,r24
+ 2358 0c52 FF4F      		movw r24,r22
+ 2359 0c54 8081      		std Y+20,r25
+ 2360 0c56 882F      		std Y+19,r24
+ 2361 0c58 90E0      		rjmp .L145
+ 2362 0c5a 8074      	.L146:
+ 2363 0c5c 9070      		ldi r24,lo8(25)
+ 2364 0c5e 0097      		ldi r25,hi8(25)
+ 2365 0c60 01F4      		std Y+18,r25
+ 2366 0c62 80E0      		std Y+17,r24
+ 2367 0c64 90E0      	.LBB150:
+ 2368 0c66 0E94 0000 	.LBB151:
+ 2370               	.Ltext57:
+ 157:program.c     ****         else if  ( ( buffer & (1<<Col4) ) == 0 ) LCD_print ( "B") ;
+ 2371               	.LM157-.LFBB3
+ 2372               	.LM157:
+ 2373 0c6c FE01      		ldd r24,Y+17
+ 2374 0c6e E95B      		ldd r25,Y+18
+ 2375 0c70 FF4F      	/* #APP */
+ 2376 0c72 8081      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 2377 0c74 8823      		1: sbiw r24,1
+ 2378 0c76 04F0      		brne 1b
+ 2379 0c78 80E0      	 ;  0 "" 2
+ 2380 0c7a 90E0      	/* #NOAPP */
+ 2381 0c7c 0E94 0000 		std Y+18,r25
+ 2382               		std Y+17,r24
+ 158:program.c     **** 
+ 159:program.c     ****     }
+ 160:program.c     **** 
+ 161:program.c     **** // Checking row 4 :
+ 162:program.c     **** 
+ 163:program.c     ****     Keypad_Out = 0xF7 ; // 0xF7                                             // make row4=0 and see 
+ 2383               	E150:
+ 2385 0c80 E8E3      	.Ltext58:
+ 2387 0c84 87EF      	.LM158:
+ 2388 0c86 8083      		ldd r24,Y+19
+ 2389 0c88 80E0      		ldd r25,Y+20
+ 2390 0c8a 90E0      		sbiw r24,1
+ 2391 0c8c A0E8      		std Y+20,r25
+ 2392 0c8e BFE3      		std Y+19,r24
+ 2393 0c90 898F      	.L145:
+ 2395 0c94 AB8F      	.LM159:
+ 2396 0c96 BC8F      		ldd r24,Y+19
+ 2397               		ldd r25,Y+20
+ 2398               		sbiw r24,0
+ 2399               		brne .L146
+ 2400               		rjmp .L147
+ 2401               	.L178:
+ 2403 0c98 698D      	.LM160:
+ 2404 0c9a 7A8D      		ldd r22,Y+21
+ 2405 0c9c 8B8D      		ldd r23,Y+22
+ 2406 0c9e 9C8D      		ldd r24,Y+23
+ 2407 0ca0 20E0      		ldd r25,Y+24
+ 2408 0ca2 30E0      		call __fixunssfsi
+ 2409 0ca4 4AE7      		movw r26,r24
+ 2410 0ca6 53E4      		movw r24,r22
+ 2411 0ca8 0E94 0000 		std Y+20,r25
+ 2412 0cac DC01      		std Y+19,r24
+ 2413 0cae CB01      	.L142:
+ 2414 0cb0 8D8B      		ldd r24,Y+19
+ 2415 0cb2 9E8B      		ldd r25,Y+20
+ 2416 0cb4 AF8B      		std Y+16,r25
+ 2417 0cb6 B88F      		std Y+15,r24
+ 2418               	.LBB152:
+ 2419               	.LBB153:
+ 2421 0cba 7E89      	.Ltext59:
+ 2423 0cbe 988D      	.LM161:
+ 2424 0cc0 20E0      		ldd r24,Y+15
+ 2425 0cc2 30E0      		ldd r25,Y+16
+ 2426 0cc4 40E8      	/* #APP */
+ 2427 0cc6 5FE3      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 2428 0cc8 0E94 0000 		1: sbiw r24,1
+ 2429 0ccc 8823      		brne 1b
+ 2430 0cce 04F4      	 ;  0 "" 2
+ 2431               	/* #NOAPP */
+ 2432               		std Y+16,r25
+ 2433               		std Y+15,r24
+ 2434 0cd0 81E0      	.L147:
+ 2435 0cd2 90E0      	.LBE153:
+ 2436 0cd4 9C8B      	.LBE152:
+ 2437 0cd6 8B8B      	.LBE149:
+ 2438 0cd8 00C0      	.LBE148:
+ 2440               	.Ltext60:
+ 2442 0cda 6D89      	.LM162:
+ 2443 0cdc 7E89      		ldi r30,lo8(54)
+ 2444 0cde 8F89      		ldi r31,hi8(54)
+ 2445 0ce0 988D      		movw r26,r28
+ 2446 0ce2 20E0      		subi r26,lo8(-(71))
+ 2447 0ce4 3FEF      		sbci r27,hi8(-(71))
+ 2448 0ce6 4FE7      		ld r24,Z
+ 2449 0ce8 57E4      		st X,r24
+ 2451 0cee 1816      	.LM163:
+ 2452 0cf0 04F4      		ldi r30,lo8(56)
+ 2453               		ldi r31,hi8(56)
+ 2454               		ld r24,Z
+ 2455               		mov r24,r24
+ 2456 0cf2 698D      		ldi r25,lo8(0)
+ 2457 0cf4 7A8D      		andi r24,lo8(8)
+ 2458 0cf6 8B8D      		andi r25,hi8(8)
+ 2459 0cf8 9C8D      		sbiw r24,0
+ 2460 0cfa 20E0      		brne .L148
+ 2462 0cfe 40E2      	.LM164:
+ 2463 0d00 51E4      		movw r30,r28
+ 2464 0d02 0E94 0000 		subi r30,lo8(-(71))
+ 2465 0d06 DC01      		sbci r31,hi8(-(71))
+ 2466 0d08 CB01      		ld r24,Z
+ 2467 0d0a BC01      		mov r24,r24
+ 2468 0d0c CD01      		ldi r25,lo8(0)
+ 2469 0d0e 0E94 0000 		andi r24,lo8(16)
+ 2470 0d12 DC01      		andi r25,hi8(16)
+ 2471 0d14 CB01      		sbiw r24,0
+ 2472 0d16 9C8B      		brne .L149
+ 2473 0d18 8B8B      		ldi r24,lo8(.LC13)
+ 2474 0d1a 00C0      		ldi r25,hi8(.LC13)
+ 2475               		call LCD_print
+ 2476 0d1c 89E1      		rjmp .L148
+ 2477 0d1e 90E0      	.L149:
+ 2479 0d22 898B      	.LM165:
+ 2480               		movw r30,r28
+ 2481               		subi r30,lo8(-(71))
+ 2482               		sbci r31,hi8(-(71))
+ 2483               		ld r24,Z
+ 2484               		mov r24,r24
+ 2485               		ldi r25,lo8(0)
+ 2486 0d24 8989      		andi r24,lo8(32)
+ 2487 0d26 9A89      		andi r25,hi8(32)
+ 2488               		sbiw r24,0
+ 2489               		brne .L150
+ 2490 0d28 0197      		ldi r24,lo8(.LC14)
+ 2491 0d2a 01F4      		ldi r25,hi8(.LC14)
+ 2492               		call LCD_print
+ 2493               		rjmp .L148
+ 2494 0d2c 9A8B      	.L150:
+ 2496               	.LM166:
+ 2497               		movw r30,r28
+ 2498               		subi r30,lo8(-(71))
+ 2499               		sbci r31,hi8(-(71))
+ 2500               		ld r24,Z
+ 2501               		mov r24,r24
+ 2502 0d30 8B89      		ldi r25,lo8(0)
+ 2503 0d32 9C89      		andi r24,lo8(64)
+ 2504 0d34 0197      		andi r25,hi8(64)
+ 2505 0d36 9C8B      		sbiw r24,0
+ 2506 0d38 8B8B      		brne .L151
+ 2507               		ldi r24,lo8(.LC15)
+ 2508               		ldi r25,hi8(.LC15)
+ 2509               		call LCD_print
+ 2510 0d3a 8B89      		rjmp .L148
+ 2511 0d3c 9C89      	.L151:
+ 2513 0d40 01F4      	.LM167:
+ 2514 0d42 00C0      		movw r30,r28
+ 2515               		subi r30,lo8(-(71))
+ 2516               		sbci r31,hi8(-(71))
+ 2517               		ld r24,Z
+ 2518 0d44 6D89      		tst r24
+ 2519 0d46 7E89      		brlt .L148
+ 2520 0d48 8F89      		ldi r24,lo8(.LC16)
+ 2521 0d4a 988D      		ldi r25,hi8(.LC16)
+ 2522 0d4c 0E94 0000 		call LCD_print
+ 2523 0d50 DC01      	.L148:
+ 2524 0d52 CB01      		ldi r24,lo8(0x41a00000)
+ 2525 0d54 9C8B      		ldi r25,hi8(0x41a00000)
+ 2526 0d56 8B8B      		ldi r26,hlo8(0x41a00000)
+ 2527               		ldi r27,hhi8(0x41a00000)
+ 2528 0d58 8B89      		std Y+11,r24
+ 2529 0d5a 9C89      		std Y+12,r25
+ 2530 0d5c 988B      		std Y+13,r26
+ 2531 0d5e 8F87      		std Y+14,r27
+ 2532               	.LBB154:
+ 2533               	.LBB155:
+ 2535               	.Ltext61:
+ 2537               	.LM168:
+ 2538 0d60 8F85      		ldd r22,Y+11
+ 2539 0d62 9889      		ldd r23,Y+12
+ 2540               		ldd r24,Y+13
+ 2541               		ldd r25,Y+14
+ 2542 0d64 0197      		ldi r18,lo8(0x437a0000)
+ 2543 0d66 01F4      		ldi r19,hi8(0x437a0000)
+ 2544               		ldi r20,hlo8(0x437a0000)
+ 2545               		ldi r21,hhi8(0x437a0000)
+ 2546 0d68 988B      		call __mulsf3
+ 2547 0d6a 8F87      		movw r26,r24
+ 2548               		movw r24,r22
+ 2549               		std Y+7,r24
+ 2550               		std Y+8,r25
+ 2551               		std Y+9,r26
+ 2552               		std Y+10,r27
+ 2554               	.LM169:
+ 164:program.c     ****     _delay_ms ( 1 ) ;
+ 165:program.c     **** 
+ 166:program.c     ****     buffer = Keypad_In ;
+ 2555               	t r24
+ 2556               		brge .L179
+ 2557 0d6c E6E3      	.L169:
+ 2559 0d70 DE01      	.LM170:
+ 2560 0d72 A95B      		ldi r24,lo8(1)
+ 2561 0d74 BF4F      		ldi r25,hi8(1)
+ 2562 0d76 8081      		std Y+6,r25
+ 2563 0d78 8C93      		std Y+5,r24
+ 167:program.c     **** 
+ 168:program.c     ****     if ( ((Keypad_Out&(1<<Row4))==0) ) {
+ 2564               	54
+ 2565               	.L179:
+ 2567 0d7c F0E0      	.LM171:
+ 2568 0d7e 8081      		ldd r22,Y+7
+ 2569 0d80 882F      		ldd r23,Y+8
+ 2570 0d82 90E0      		ldd r24,Y+9
+ 2571 0d84 8870      		ldd r25,Y+10
+ 2572 0d86 9070      		ldi r18,lo8(0x477fff00)
+ 2573 0d88 0097      		ldi r19,hi8(0x477fff00)
+ 2574 0d8a 01F4      		ldi r20,hlo8(0x477fff00)
+ 169:program.c     **** 
+ 170:program.c     ****         if 		 ( ( buffer & (1<<Col1) ) == 0 ) LCD_print ( "C" ) ;
+ 2575               	i8(0x477fff00)
+ 2576               		call __gtsf2
+ 2577 0d8c FE01      		cp __zero_reg__,r24
+ 2578 0d8e E95B      		brge .L180
+ 2579 0d90 FF4F      	.L170:
+ 2581 0d94 882F      	.LM172:
+ 2582 0d96 90E0      		ldd r22,Y+11
+ 2583 0d98 8071      		ldd r23,Y+12
+ 2584 0d9a 9070      		ldd r24,Y+13
+ 2585 0d9c 0097      		ldd r25,Y+14
+ 2586 0d9e 01F4      		ldi r18,lo8(0x41200000)
+ 2587 0da0 80E0      		ldi r19,hi8(0x41200000)
+ 2588 0da2 90E0      		ldi r20,hlo8(0x41200000)
+ 2589 0da4 0E94 0000 		ldi r21,hhi8(0x41200000)
+ 2590 0da8 00C0      		call __mulsf3
+ 2591               		movw r26,r24
+ 171:program.c     ****         else if  ( ( buffer & (1<<Col2) ) == 0 ) LCD_print ( "D") ;
+ 2592               	vw r22,r24
+ 2593               		movw r24,r26
+ 2594 0daa FE01      		call __fixunssfsi
+ 2595 0dac E95B      		movw r26,r24
+ 2596 0dae FF4F      		movw r24,r22
+ 2597 0db0 8081      		std Y+6,r25
+ 2598 0db2 882F      		std Y+5,r24
+ 2599 0db4 90E0      		rjmp .L157
+ 2600 0db6 8072      	.L158:
+ 2601 0db8 9070      		ldi r24,lo8(25)
+ 2602 0dba 0097      		ldi r25,hi8(25)
+ 2603 0dbc 01F4      		std Y+4,r25
+ 2604 0dbe 80E0      		std Y+3,r24
+ 2605 0dc0 90E0      	.LBB156:
+ 2606 0dc2 0E94 0000 	.LBB157:
+ 2608               	.Ltext62:
+ 172:program.c     ****         else if  ( ( buffer & (1<<Col3) ) == 0 ) LCD_print ( "E") ;
+ 2609               	.LM173-.LFBB3
+ 2610               	.LM173:
+ 2611 0dc8 FE01      		ldd r24,Y+3
+ 2612 0dca E95B      		ldd r25,Y+4
+ 2613 0dcc FF4F      	/* #APP */
+ 2614 0dce 8081      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 2615 0dd0 882F      		1: sbiw r24,1
+ 2616 0dd2 90E0      		brne 1b
+ 2617 0dd4 8074      	 ;  0 "" 2
+ 2618 0dd6 9070      	/* #NOAPP */
+ 2619 0dd8 0097      		std Y+4,r25
+ 2620 0dda 01F4      		std Y+3,r24
+ 2621 0ddc 80E0      	.LBE157:
+ 2622 0dde 90E0      	.LBE156:
+ 2624 0de4 00C0      	.Ltext63:
+ 173:program.c     ****         else if  ( ( buffer & (1<<Col4) ) == 0 ) LCD_print ( "F") ;
+ 2626               	Y+5
+ 2627               		ldd r25,Y+6
+ 2628 0de6 FE01      		sbiw r24,1
+ 2629 0de8 E95B      		std Y+6,r25
+ 2630 0dea FF4F      		std Y+5,r24
+ 2631 0dec 8081      	.L157:
+ 2633 0df0 04F0      	.LM175:
+ 2634 0df2 80E0      		ldd r24,Y+5
+ 2635 0df4 90E0      		ldd r25,Y+6
+ 2636 0df6 0E94 0000 		sbiw r24,0
+ 2637               		brne .L158
+ 2638 0dfa 80E0      		rjmp .L159
+ 2639 0dfc 90E0      	.L180:
+ 2641 0e00 B1E4      	.LM176:
+ 2642 0e02 8B87      		ldd r22,Y+7
+ 2643 0e04 9C87      		ldd r23,Y+8
+ 2644 0e06 AD87      		ldd r24,Y+9
+ 2645 0e08 BE87      		ldd r25,Y+10
+ 2646               		call __fixunssfsi
+ 2647               		movw r26,r24
+ 2648               		movw r24,r22
+ 2649               		std Y+6,r25
+ 2650               		std Y+5,r24
+ 2651               	.L154:
+ 2652 0e0a 6B85      		ldd r24,Y+5
+ 2653 0e0c 7C85      		ldd r25,Y+6
+ 2654 0e0e 8D85      		std Y+2,r25
+ 2655 0e10 9E85      		std Y+1,r24
+ 2656 0e12 20E0      	.LBB158:
+ 2657 0e14 30E0      	.LBB159:
+ 2659 0e18 53E4      	.Ltext64:
+ 2661 0e1e DC01      	.LM177:
+ 2662 0e20 CB01      		ldd r24,Y+1
+ 2663 0e22 8F83      		ldd r25,Y+2
+ 2664 0e24 9887      	/* #APP */
+ 2665 0e26 A987      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 2666 0e28 BA87      		1: sbiw r24,1
+ 2667               		brne 1b
+ 2668               	 ;  0 "" 2
+ 2669 0e2a 6F81      	/* #NOAPP */
+ 2670 0e2c 7885      		std Y+2,r25
+ 2671 0e2e 8985      		std Y+1,r24
+ 2672 0e30 9A85      	.L159:
+ 2673 0e32 20E0      	.LBE159:
+ 2674 0e34 30E0      	.LBE158:
+ 2675 0e36 40E8      	.LBE155:
+ 2676 0e38 5FE3      	.LBE154:
+ 2678 0e3e 8823      	.Ltext65:
+ 2680               	.LM178:
+ 2681               		ldi r24,lo8(1)
+ 2682               		call LCD_command
+ 2683 0e42 81E0      	/* epilogue start */
+ 2685 0e46 9E83      	.LM179:
+ 2686 0e48 8D83      		subi r28,lo8(-(71))
+ 2687 0e4a 00C0      		sbci r29,hi8(-(71))
+ 2688               		in __tmp_reg__,__SREG__
+ 2689               		cli
+ 2690               		out __SP_H__,r29
+ 2691 0e4c 6F81      		out __SREG__,__tmp_reg__
+ 2692 0e4e 7885      		out __SP_L__,r28
+ 2693 0e50 8985      		pop r28
+ 2694 0e52 9A85      		pop r29
+ 2695 0e54 20E0      		pop r17
+ 2696 0e56 3FEF      		pop r16
+ 2697 0e58 4FE7      		ret
+ 2702               	.Lscope3:
+ 2705 0e64 6B85      	.global	LCD_command
+ 2707 0e68 8D85      	LCD_command:
+ 2709 0e6c 20E0      	.LM180:
+ 2710 0e6e 30E0      	.LFBB4:
+ 2711 0e70 40E2      		push r29
+ 2712 0e72 51E4      		push r28
+ 2713 0e74 0E94 0000 		in r28,__SP_L__
+ 2714 0e78 DC01      		in r29,__SP_H__
+ 2715 0e7a CB01      		sbiw r28,29
+ 2716 0e7c BC01      		in __tmp_reg__,__SREG__
+ 2717 0e7e CD01      		cli
+ 2718 0e80 0E94 0000 		out __SP_H__,r29
+ 2719 0e84 DC01      		out __SREG__,__tmp_reg__
+ 2720 0e86 CB01      		out __SP_L__,r28
+ 2721 0e88 9E83      	/* prologue: function */
+ 2722 0e8a 8D83      	/* frame size = 29 */
+ 2723 0e8c 00C0      		std Y+29,r24
+ 2725 0e8e 89E1      	.LM181:
+ 2726 0e90 90E0      		ldi r30,lo8(53)
+ 2727 0e92 9C83      		ldi r31,hi8(53)
+ 2728 0e94 8B83      		ldd r24,Y+29
+ 2729               		st Z,r24
+ 2731               	.LM182:
+ 2732               		ldi r30,lo8(50)
+ 2733               		ldi r31,hi8(50)
+ 2734               		ldi r24,lo8(-128)
+ 2735 0e96 8B81      		st Z,r24
+ 2736 0e98 9C81      		ldi r24,lo8(0x3f800000)
+ 2737               		ldi r25,hi8(0x3f800000)
+ 2738               		ldi r26,hlo8(0x3f800000)
+ 2739 0e9a 0197      		ldi r27,hhi8(0x3f800000)
+ 2740 0e9c 01F4      		std Y+25,r24
+ 2741               		std Y+26,r25
+ 2742               		std Y+27,r26
+ 2743 0e9e 9C83      		std Y+28,r27
+ 2744 0ea0 8B83      	.LBB172:
+ 2745               	.LBB173:
+ 2747               	.Ltext66:
+ 2749               	.LM183:
+ 2750               		ldd r22,Y+25
+ 2751 0ea2 8D81      		ldd r23,Y+26
+ 2752 0ea4 9E81      		ldd r24,Y+27
+ 2753 0ea6 0197      		ldd r25,Y+28
+ 2754 0ea8 9E83      		ldi r18,lo8(0x437a0000)
+ 2755 0eaa 8D83      		ldi r19,hi8(0x437a0000)
+ 2756               		ldi r20,hlo8(0x437a0000)
+ 2757               		ldi r21,hhi8(0x437a0000)
+ 2758               		call __mulsf3
+ 2759 0eac 8D81      		movw r26,r24
+ 2760 0eae 9E81      		movw r24,r22
+ 2761 0eb0 0097      		std Y+21,r24
+ 2762 0eb2 01F4      		std Y+22,r25
+ 2763 0eb4 00C0      		std Y+23,r26
+ 2764               		std Y+24,r27
+ 2766               	.LM184:
+ 2767 0eb6 6F81      		ldd r22,Y+21
+ 2768 0eb8 7885      		ldd r23,Y+22
+ 2769 0eba 8985      		ldd r24,Y+23
+ 2770 0ebc 9A85      		ldd r25,Y+24
+ 2771 0ebe 0E94 0000 		ldi r18,lo8(0x3f800000)
+ 2772 0ec2 DC01      		ldi r19,hi8(0x3f800000)
+ 2773 0ec4 CB01      		ldi r20,hlo8(0x3f800000)
+ 2774 0ec6 9E83      		ldi r21,hhi8(0x3f800000)
+ 2775 0ec8 8D83      		call __ltsf2
+ 2776               		tst r24
+ 2777 0eca 8D81      		brge .L203
+ 2778 0ecc 9E81      	.L199:
+ 2780 0ed0 8983      	.LM185:
+ 2781               		ldi r24,lo8(1)
+ 2782               		ldi r25,hi8(1)
+ 2783               		std Y+20,r25
+ 2784               		std Y+19,r24
+ 2785               		rjmp .L184
+ 2786               	.L203:
+ 2788 0ed4 9A81      	.LM186:
+ 2789               		ldd r22,Y+21
+ 2790               		ldd r23,Y+22
+ 2791 0ed6 0197      		ldd r24,Y+23
+ 2792 0ed8 01F4      		ldd r25,Y+24
+ 2793               		ldi r18,lo8(0x477fff00)
+ 2794               		ldi r19,hi8(0x477fff00)
+ 2795 0eda 9A83      		ldi r20,hlo8(0x477fff00)
+ 2796 0edc 8983      		ldi r21,hhi8(0x477fff00)
+ 2797               		call __gtsf2
+ 2798               		cp __zero_reg__,r24
+ 2799               		brge .L204
+ 2800               	.L200:
+ 2802               	.LM187:
+ 2803               		ldd r22,Y+25
+ 174:program.c     **** 
+ 175:program.c     ****     }
+ 176:program.c     ****     _delay_ms ( 20 ) ;
+ 177:program.c     ****     LCD_command( 0x01 ) ;
+ 2804               	 r24,r22
+ 2805               		movw r22,r24
+ 2806 0ede 81E0      		movw r24,r26
+ 2807 0ee0 0E94 0000 		call __fixunssfsi
+ 2808               		movw r26,r24
+ 178:program.c     **** 
+ 179:program.c     **** }
+ 2809               	 r24,r22
+ 2810               		std Y+20,r25
+ 2811 0ee4 C95B      		std Y+19,r24
+ 2812 0ee6 DF4F      		rjmp .L187
+ 2813 0ee8 0FB6      	.L188:
+ 2814 0eea F894      		ldi r24,lo8(25)
+ 2815 0eec DEBF      		ldi r25,hi8(25)
+ 2816 0eee 0FBE      		std Y+18,r25
+ 2817 0ef0 CDBF      		std Y+17,r24
+ 2818 0ef2 CF91      	.LBB174:
+ 2819 0ef4 DF91      	.LBB175:
+ 2821 0ef8 0F91      	.Ltext67:
+ 2823               	.LM188:
+ 2824               		ldd r24,Y+17
+ 2825               		ldd r25,Y+18
+ 2826               	/* #APP */
+ 2827               	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 2828               		1: sbiw r24,1
+ 2829               		brne 1b
+ 2830               	 ;  0 "" 2
+ 2831               	/* #NOAPP */
+ 2832               		std Y+18,r25
+ 180:program.c     **** 
+ 181:program.c     **** // Command sending Routine :
+ 182:program.c     **** 
+ 183:program.c     **** void LCD_command ( unsigned char a ) {
+ 2833               	LBE174:
+ 2835               	.Ltext68:
+ 2837 0efe CF93      	.LM189:
+ 2838 0f00 CDB7      		ldd r24,Y+19
+ 2839 0f02 DEB7      		ldd r25,Y+20
+ 2840 0f04 6D97      		sbiw r24,1
+ 2841 0f06 0FB6      		std Y+20,r25
+ 2842 0f08 F894      		std Y+19,r24
+ 2843 0f0a DEBF      	.L187:
+ 2845 0f0e CDBF      	.LM190:
+ 2846               		ldd r24,Y+19
+ 2847               		ldd r25,Y+20
+ 2848 0f10 8D8F      		sbiw r24,0
+ 184:program.c     **** 
+ 185:program.c     ****     Data = a ;
+ 2849               	p .L189
+ 2850               	.L204:
+ 2852 0f14 F0E0      	.LM191:
+ 2853 0f16 8D8D      		ldd r22,Y+21
+ 2854 0f18 8083      		ldd r23,Y+22
+ 186:program.c     ****     Command = (0<<RS) | (1<<E) ;
+ 2855               	24,Y+23
+ 2856               		ldd r25,Y+24
+ 2857 0f1a E2E3      		call __fixunssfsi
+ 2858 0f1c F0E0      		movw r26,r24
+ 2859 0f1e 80E8      		movw r24,r22
+ 2860 0f20 8083      		std Y+20,r25
+ 2861 0f22 80E0      		std Y+19,r24
+ 2862 0f24 90E0      	.L184:
+ 2863 0f26 A0E8      		ldd r24,Y+19
+ 2864 0f28 BFE3      		ldd r25,Y+20
+ 2865 0f2a 898F      		std Y+16,r25
+ 2866 0f2c 9A8F      		std Y+15,r24
+ 2867 0f2e AB8F      	.LBB176:
+ 2868 0f30 BC8F      	.LBB177:
+ 2870               	.Ltext69:
+ 2872               	.LM192:
+ 2873               		ldd r24,Y+15
+ 2874               		ldd r25,Y+16
+ 2875 0f32 698D      	/* #APP */
+ 2876 0f34 7A8D      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 2877 0f36 8B8D      		1: sbiw r24,1
+ 2878 0f38 9C8D      		brne 1b
+ 2879 0f3a 20E0      	 ;  0 "" 2
+ 2880 0f3c 30E0      	/* #NOAPP */
+ 2881 0f3e 4AE7      		std Y+16,r25
+ 2882 0f40 53E4      		std Y+15,r24
+ 2883 0f42 0E94 0000 	.L189:
+ 2884 0f46 DC01      	.LBE177:
+ 2885 0f48 CB01      	.LBE176:
+ 2886 0f4a 8D8B      	.LBE173:
+ 2887 0f4c 9E8B      	.LBE172:
+ 2889 0f50 B88F      	.Ltext70:
+ 2891               	.LM193:
+ 2892 0f52 6D89      		ldi r30,lo8(50)
+ 2893 0f54 7E89      		ldi r31,hi8(50)
+ 2894 0f56 8F89      		st Z,__zero_reg__
+ 2895 0f58 988D      		ldi r24,lo8(0x42200000)
+ 2896 0f5a 20E0      		ldi r25,hi8(0x42200000)
+ 2897 0f5c 30E0      		ldi r26,hlo8(0x42200000)
+ 2898 0f5e 40E8      		ldi r27,hhi8(0x42200000)
+ 2899 0f60 5FE3      		std Y+11,r24
+ 2900 0f62 0E94 0000 		std Y+12,r25
+ 2901 0f66 8823      		std Y+13,r26
+ 2902 0f68 04F4      		std Y+14,r27
+ 2903               	.LBB178:
+ 2904               	.LBB179:
+ 2906 0f6a 81E0      	.Ltext71:
+ 2908 0f6e 9C8B      	.LM194:
+ 2909 0f70 8B8B      		ldd r22,Y+11
+ 2910 0f72 00C0      		ldd r23,Y+12
+ 2911               		ldd r24,Y+13
+ 2912               		ldd r25,Y+14
+ 2913               		ldi r18,lo8(0x437a0000)
+ 2914 0f74 6D89      		ldi r19,hi8(0x437a0000)
+ 2915 0f76 7E89      		ldi r20,hlo8(0x437a0000)
+ 2916 0f78 8F89      		ldi r21,hhi8(0x437a0000)
+ 2917 0f7a 988D      		call __mulsf3
+ 2918 0f7c 20E0      		movw r26,r24
+ 2919 0f7e 3FEF      		movw r24,r22
+ 2920 0f80 4FE7      		std Y+7,r24
+ 2921 0f82 57E4      		std Y+8,r25
+ 2922 0f84 0E94 0000 		std Y+9,r26
+ 2923 0f88 1816      		std Y+10,r27
+ 2925               	.LM195:
+ 2926               		ldd r22,Y+7
+ 2927               		ldd r23,Y+8
+ 2928 0f8c 698D      		ldd r24,Y+9
+ 2929 0f8e 7A8D      		ldd r25,Y+10
+ 2930 0f90 8B8D      		ldi r18,lo8(0x3f800000)
+ 2931 0f92 9C8D      		ldi r19,hi8(0x3f800000)
+ 2932 0f94 20E0      		ldi r20,hlo8(0x3f800000)
+ 2933 0f96 30E0      		ldi r21,hhi8(0x3f800000)
+ 2934 0f98 40E2      		call __ltsf2
+ 2935 0f9a 51E4      		tst r24
+ 2936 0f9c 0E94 0000 		brge .L205
+ 2937 0fa0 DC01      	.L201:
+ 2939 0fa4 BC01      	.LM196:
+ 2940 0fa6 CD01      		ldi r24,lo8(1)
+ 2941 0fa8 0E94 0000 		ldi r25,hi8(1)
+ 2942 0fac DC01      		std Y+6,r25
+ 2943 0fae CB01      		std Y+5,r24
+ 2944 0fb0 9C8B      		rjmp .L192
+ 2945 0fb2 8B8B      	.L205:
+ 2947               	.LM197:
+ 2948 0fb6 89E1      		ldd r22,Y+7
+ 2949 0fb8 90E0      		ldd r23,Y+8
+ 2950 0fba 9A8B      		ldd r24,Y+9
+ 2951 0fbc 898B      		ldd r25,Y+10
+ 2952               		ldi r18,lo8(0x477fff00)
+ 2953               		ldi r19,hi8(0x477fff00)
+ 2954               		ldi r20,hlo8(0x477fff00)
+ 2955               		ldi r21,hhi8(0x477fff00)
+ 2956               		call __gtsf2
+ 2957               		cp __zero_reg__,r24
+ 2958 0fbe 8989      		brge .L206
+ 2959 0fc0 9A89      	.L202:
+ 2961               	.LM198:
+ 2962 0fc2 0197      		ldd r22,Y+11
+ 2963 0fc4 01F4      		ldd r23,Y+12
+ 2964               		ldd r24,Y+13
+ 2965               		ldd r25,Y+14
+ 2966 0fc6 9A8B      		ldi r18,lo8(0x41200000)
+ 2967 0fc8 898B      		ldi r19,hi8(0x41200000)
+ 2968               		ldi r20,hlo8(0x41200000)
+ 2969               		ldi r21,hhi8(0x41200000)
+ 2970               		call __mulsf3
+ 2971               		movw r26,r24
+ 2972               		movw r24,r22
+ 2973               		movw r22,r24
+ 2974 0fca 8B89      		movw r24,r26
+ 2975 0fcc 9C89      		call __fixunssfsi
+ 2976 0fce 0197      		movw r26,r24
+ 2977 0fd0 9C8B      		movw r24,r22
+ 2978 0fd2 8B8B      		std Y+6,r25
+ 2979               		std Y+5,r24
+ 2980               		rjmp .L195
+ 2981               	.L196:
+ 2982 0fd4 8B89      		ldi r24,lo8(25)
+ 2983 0fd6 9C89      		ldi r25,hi8(25)
+ 2984 0fd8 0097      		std Y+4,r25
+ 2985 0fda 01F4      		std Y+3,r24
+ 2986 0fdc 00C0      	.LBB180:
+ 2987               	.LBB181:
+ 2989               	.Ltext72:
+ 2991 0fe0 7E89      	.LM199:
+ 2992 0fe2 8F89      		ldd r24,Y+3
+ 2993 0fe4 988D      		ldd r25,Y+4
+ 2994 0fe6 0E94 0000 	/* #APP */
+ 2995 0fea DC01      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 2996 0fec CB01      		1: sbiw r24,1
+ 2997 0fee 9C8B      		brne 1b
+ 2998 0ff0 8B8B      	 ;  0 "" 2
+ 2999               	/* #NOAPP */
+ 3000 0ff2 8B89      		std Y+4,r25
+ 3001 0ff4 9C89      		std Y+3,r24
+ 3002 0ff6 988B      	.LBE181:
+ 3003 0ff8 8F87      	.LBE180:
+ 3005               	.Ltext73:
+ 3007               	.LM200:
+ 3008               		ldd r24,Y+5
+ 3009               		ldd r25,Y+6
+ 3010 0ffa 8F85      		sbiw r24,1
+ 3011 0ffc 9889      		std Y+6,r25
+ 3012               		std Y+5,r24
+ 3013               	.L195:
+ 3015 1000 01F4      	.LM201:
+ 3016               		ldd r24,Y+5
+ 3017               		ldd r25,Y+6
+ 3018 1002 988B      		sbiw r24,0
+ 3019 1004 8F87      		brne .L196
+ 3020               		rjmp .L198
+ 3021               	.L206:
+ 3023               	.LM202:
+ 3024               		ldd r22,Y+7
+ 3025               		ldd r23,Y+8
+ 3026               		ldd r24,Y+9
+ 187:program.c     ****     _delay_ms (1) ;
+ 188:program.c     ****     Command = (0<<RS) | (0<<E) ;
+ 3027               	"c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h",132,0,0,.Ltext74
+ 3028               	.Ltext74:
+ 3030 1008 F0E0      	.LM203:
+ 3031 100a 1082      		ldd r24,Y+1
+ 3032 100c 80E0      		ldd r25,Y+2
+ 3033 100e 90E0      	/* #APP */
+ 3034 1010 A0E2      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 3035 1012 B2E4      		1: sbiw r24,1
+ 3036 1014 8B87      		brne 1b
+ 3037 1016 9C87      	 ;  0 "" 2
+ 3038 1018 AD87      	/* #NOAPP */
+ 3039 101a BE87      		std Y+2,r25
+ 3040               		std Y+1,r24
+ 3041               	.L198:
+ 3042               	/* epilogue start */
+ 3043               	.LBE183:
+ 3044               	.LBE182:
+ 3045               	.LBE179:
+ 3046 101c 6B85      	.LBE178:
+ 3048 1020 8D85      	.Ltext75:
+ 3050 1024 20E0      	.LM204:
+ 3051 1026 30E0      		adiw r28,29
+ 3052 1028 4AE7      		in __tmp_reg__,__SREG__
+ 3053 102a 53E4      		cli
+ 3054 102c 0E94 0000 		out __SP_H__,r29
+ 3055 1030 DC01      		out __SREG__,__tmp_reg__
+ 3056 1032 CB01      		out __SP_L__,r28
+ 3057 1034 8F83      		pop r28
+ 3058 1036 9887      		pop r29
+ 3059 1038 A987      		ret
+ 3061               	.Lscope4:
+ 3064 103e 7885      	.global	LCD_data
+ 3066 1042 9A85      	LCD_data:
+ 3068 1046 30E0      	.LM205:
+ 3069 1048 40E8      	.LFBB5:
+ 3070 104a 5FE3      		push r29
+ 3071 104c 0E94 0000 		push r28
+ 3072 1050 8823      		in r28,__SP_L__
+ 3073 1052 04F4      		in r29,__SP_H__
+ 3074               		sbiw r28,29
+ 3075               		in __tmp_reg__,__SREG__
+ 3076               		cli
+ 3077 1054 81E0      		out __SP_H__,r29
+ 3078 1056 90E0      		out __SREG__,__tmp_reg__
+ 3079 1058 9E83      		out __SP_L__,r28
+ 3080 105a 8D83      	/* prologue: function */
+ 3081 105c 00C0      	/* frame size = 29 */
+ 3082               		std Y+29,r24
+ 3084               	.LM206:
+ 3085 105e 6F81      		ldi r30,lo8(53)
+ 3086 1060 7885      		ldi r31,hi8(53)
+ 3087 1062 8985      		ldd r24,Y+29
+ 3088 1064 9A85      		st Z,r24
+ 3090 1068 3FEF      	.LM207:
+ 3091 106a 4FE7      		ldi r30,lo8(50)
+ 3092 106c 57E4      		ldi r31,hi8(50)
+ 3093 106e 0E94 0000 		ldi r24,lo8(-64)
+ 3094 1072 1816      		st Z,r24
+ 3095 1074 04F4      		ldi r24,lo8(0x3f800000)
+ 3096               		ldi r25,hi8(0x3f800000)
+ 3097               		ldi r26,hlo8(0x3f800000)
+ 3098               		ldi r27,hhi8(0x3f800000)
+ 3099 1076 6B85      		std Y+25,r24
+ 3100 1078 7C85      		std Y+26,r25
+ 3101 107a 8D85      		std Y+27,r26
+ 3102 107c 9E85      		std Y+28,r27
+ 3103 107e 20E0      	.LBB196:
+ 3104 1080 30E0      	.LBB197:
+ 3106 1084 51E4      	.Ltext76:
+ 3108 108a DC01      	.LM208:
+ 3109 108c CB01      		ldd r22,Y+25
+ 3110 108e BC01      		ldd r23,Y+26
+ 3111 1090 CD01      		ldd r24,Y+27
+ 3112 1092 0E94 0000 		ldd r25,Y+28
+ 3113 1096 DC01      		ldi r18,lo8(0x437a0000)
+ 3114 1098 CB01      		ldi r19,hi8(0x437a0000)
+ 3115 109a 9E83      		ldi r20,hlo8(0x437a0000)
+ 3116 109c 8D83      		ldi r21,hhi8(0x437a0000)
+ 3117 109e 00C0      		call __mulsf3
+ 3118               		movw r26,r24
+ 3119 10a0 89E1      		movw r24,r22
+ 3120 10a2 90E0      		std Y+21,r24
+ 3121 10a4 9C83      		std Y+22,r25
+ 3122 10a6 8B83      		std Y+23,r26
+ 3123               		std Y+24,r27
+ 3125               	.LM209:
+ 3126               		ldd r22,Y+21
+ 3127               		ldd r23,Y+22
+ 3128               		ldd r24,Y+23
+ 3129 10a8 8B81      		ldd r25,Y+24
+ 3130 10aa 9C81      		ldi r18,lo8(0x3f800000)
+ 3131               		ldi r19,hi8(0x3f800000)
+ 3132               		ldi r20,hlo8(0x3f800000)
+ 3133 10ac 0197      		ldi r21,hhi8(0x3f800000)
+ 3134 10ae 01F4      		call __ltsf2
+ 3135               		tst r24
+ 3136               		brge .L229
+ 3137 10b0 9C83      	.L225:
+ 3139               	.LM210:
+ 3140               		ldi r24,lo8(1)
+ 3141               		ldi r25,hi8(1)
+ 3142               		std Y+20,r25
+ 3143               		std Y+19,r24
+ 3144               		rjmp .L210
+ 3145 10b4 8D81      	.L229:
+ 3147 10b8 0197      	.LM211:
+ 3148 10ba 9E83      		ldd r22,Y+21
+ 3149 10bc 8D83      		ldd r23,Y+22
+ 3150               		ldd r24,Y+23
+ 3151               		ldd r25,Y+24
+ 3152               		ldi r18,lo8(0x477fff00)
+ 3153 10be 8D81      		ldi r19,hi8(0x477fff00)
+ 3154 10c0 9E81      		ldi r20,hlo8(0x477fff00)
+ 3155 10c2 0097      		ldi r21,hhi8(0x477fff00)
+ 3156 10c4 01F4      		call __gtsf2
+ 3157 10c6 00C0      		cp __zero_reg__,r24
+ 3158               		brge .L230
+ 3159               	.L226:
+ 3161 10c8 6F81      	.LM212:
+ 3162 10ca 7885      		ldd r22,Y+25
+ 3163 10cc 8985      		ldd r23,Y+26
+ 3164 10ce 9A85      		ldd r24,Y+27
+ 3165 10d0 0E94 0000 		ldd r25,Y+28
+ 3166 10d4 DC01      		ldi r18,lo8(0x41200000)
+ 3167 10d6 CB01      		ldi r19,hi8(0x41200000)
+ 3168 10d8 9E83      		ldi r20,hlo8(0x41200000)
+ 3169 10da 8D83      		ldi r21,hhi8(0x41200000)
+ 3170               		call __mulsf3
+ 3171 10dc 8D81      		movw r26,r24
+ 3172 10de 9E81      		movw r24,r22
+ 3173 10e0 9A83      		movw r22,r24
+ 3174 10e2 8983      		movw r24,r26
+ 3175               		call __fixunssfsi
+ 3176               		movw r26,r24
+ 3177               		movw r24,r22
+ 3178               		std Y+20,r25
+ 3179               		std Y+19,r24
+ 3180               		rjmp .L213
+ 3181 10e4 8981      	.L214:
+ 3182 10e6 9A81      		ldi r24,lo8(25)
+ 3183               		ldi r25,hi8(25)
+ 3184               		std Y+18,r25
+ 3185 10e8 0197      		std Y+17,r24
+ 3186 10ea 01F4      	.LBB198:
+ 3187               	.LBB199:
+ 3189 10ec 9A83      	.Ltext77:
+ 3191               	.LM213:
+ 3192               		ldd r24,Y+17
+ 3193               		ldd r25,Y+18
+ 3194               	/* #APP */
+ 3195               	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 3196               		1: sbiw r24,1
+ 3197               		brne 1b
+ 3198               	 ;  0 "" 2
+ 189:program.c     ****     _delay_ms ( 40 ) ;
+ 190:program.c     **** 
+ 191:program.c     **** }
+ 3199               	BB5
+ 3200               	.LM214:
+ 3201 10f0 6D96      		ldd r24,Y+19
+ 3202 10f2 0FB6      		ldd r25,Y+20
+ 3203 10f4 F894      		sbiw r24,1
+ 3204 10f6 DEBF      		std Y+20,r25
+ 3205 10f8 0FBE      		std Y+19,r24
+ 3206 10fa CDBF      	.L213:
+ 3208 10fe DF91      	.LM215:
+ 3209 1100 0895      		ldd r24,Y+19
+ 3210               		ldd r25,Y+20
+ 3211               		sbiw r24,0
+ 3212               		brne .L214
+ 3213               		rjmp .L215
+ 3214               	.L230:
+ 3216               	.LM216:
+ 192:program.c     **** 
+ 193:program.c     **** // Data Sending Routine :
+ 194:program.c     **** 
+ 195:program.c     **** void LCD_data ( unsigned char a ) {
+ 3217               	 r23,Y+22
+ 3218               		ldd r24,Y+23
+ 3219               		ldd r25,Y+24
+ 3220 1102 DF93      		call __fixunssfsi
+ 3221 1104 CF93      		movw r26,r24
+ 3222 1106 CDB7      		movw r24,r22
+ 3223 1108 DEB7      		std Y+20,r25
+ 3224 110a 6D97      		std Y+19,r24
+ 3225 110c 0FB6      	.L210:
+ 3226 110e F894      		ldd r24,Y+19
+ 3227 1110 DEBF      		ldd r25,Y+20
+ 3228 1112 0FBE      		std Y+16,r25
+ 3229 1114 CDBF      		std Y+15,r24
+ 3230               	.LBB200:
+ 3231               	.LBB201:
+ 196:program.c     **** 
+ 197:program.c     ****     Data = a ;
+ 3233               	n	68,0,105,.LM217-.LFBB5
+ 3234               	.LM217:
+ 3235 1118 E5E3      		ldd r24,Y+15
+ 3236 111a F0E0      		ldd r25,Y+16
+ 3237 111c 8D8D      	/* #APP */
+ 3238 111e 8083      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 198:program.c     ****     Command = (1<<RS) | (1<<E) ;
+ 3239               	iw r24,1
+ 3240               		brne 1b
+ 3241 1120 E2E3      	 ;  0 "" 2
+ 3242 1122 F0E0      	/* #NOAPP */
+ 3243 1124 80EC      		std Y+16,r25
+ 3244 1126 8083      		std Y+15,r24
+ 3245 1128 80E0      	.L215:
+ 3246 112a 90E0      	.LBE201:
+ 3247 112c A0E8      	.LBE200:
+ 3248 112e BFE3      	.LBE197:
+ 3249 1130 898F      	.LBE196:
+ 3251 1134 AB8F      	.Ltext80:
+ 3253               	.LM218:
+ 3254               		ldi r30,lo8(50)
+ 3255               		ldi r31,hi8(50)
+ 3256               		ldi r24,lo8(64)
+ 3257               		st Z,r24
+ 3258               		ldi r24,lo8(0x42200000)
+ 3259 1138 698D      		ldi r25,hi8(0x42200000)
+ 3260 113a 7A8D      		ldi r26,hlo8(0x42200000)
+ 3261 113c 8B8D      		ldi r27,hhi8(0x42200000)
+ 3262 113e 9C8D      		std Y+11,r24
+ 3263 1140 20E0      		std Y+12,r25
+ 3264 1142 30E0      		std Y+13,r26
+ 3265 1144 4AE7      		std Y+14,r27
+ 3266 1146 53E4      	.LBB202:
+ 3267 1148 0E94 0000 	.LBB203:
+ 3269 114e CB01      	.Ltext81:
+ 3271 1152 9E8B      	.LM219:
+ 3272 1154 AF8B      		ldd r22,Y+11
+ 3273 1156 B88F      		ldd r23,Y+12
+ 3274               		ldd r24,Y+13
+ 3275               		ldd r25,Y+14
+ 3276 1158 6D89      		ldi r18,lo8(0x437a0000)
+ 3277 115a 7E89      		ldi r19,hi8(0x437a0000)
+ 3278 115c 8F89      		ldi r20,hlo8(0x437a0000)
+ 3279 115e 988D      		ldi r21,hhi8(0x437a0000)
+ 3280 1160 20E0      		call __mulsf3
+ 3281 1162 30E0      		movw r26,r24
+ 3282 1164 40E8      		movw r24,r22
+ 3283 1166 5FE3      		std Y+7,r24
+ 3284 1168 0E94 0000 		std Y+8,r25
+ 3285 116c 8823      		std Y+9,r26
+ 3286 116e 04F4      		std Y+10,r27
+ 3288               	.LM220:
+ 3289               		ldd r22,Y+7
+ 3290 1170 81E0      		ldd r23,Y+8
+ 3291 1172 90E0      		ldd r24,Y+9
+ 3292 1174 9C8B      		ldd r25,Y+10
+ 3293 1176 8B8B      		ldi r18,lo8(0x3f800000)
+ 3294 1178 00C0      		ldi r19,hi8(0x3f800000)
+ 3295               		ldi r20,hlo8(0x3f800000)
+ 3296               		ldi r21,hhi8(0x3f800000)
+ 3297               		call __ltsf2
+ 3298 117a 6D89      		tst r24
+ 3299 117c 7E89      		brge .L231
+ 3300 117e 8F89      	.L227:
+ 3302 1182 20E0      	.LM221:
+ 3303 1184 3FEF      		ldi r24,lo8(1)
+ 3304 1186 4FE7      		ldi r25,hi8(1)
+ 3305 1188 57E4      		std Y+6,r25
+ 3306 118a 0E94 0000 		std Y+5,r24
+ 3307 118e 1816      		rjmp .L218
+ 3308 1190 04F4      	.L231:
+ 3310               	.LM222:
+ 3311               		ldd r22,Y+7
+ 3312 1192 698D      		ldd r23,Y+8
+ 3313 1194 7A8D      		ldd r24,Y+9
+ 3314 1196 8B8D      		ldd r25,Y+10
+ 3315 1198 9C8D      		ldi r18,lo8(0x477fff00)
+ 3316 119a 20E0      		ldi r19,hi8(0x477fff00)
+ 3317 119c 30E0      		ldi r20,hlo8(0x477fff00)
+ 3318 119e 40E2      		ldi r21,hhi8(0x477fff00)
+ 3319 11a0 51E4      		call __gtsf2
+ 3320 11a2 0E94 0000 		cp __zero_reg__,r24
+ 3321 11a6 DC01      		brge .L232
+ 3322 11a8 CB01      	.L228:
+ 3324 11ac CD01      	.LM223:
+ 3325 11ae 0E94 0000 		ldd r22,Y+11
+ 3326 11b2 DC01      		ldd r23,Y+12
+ 3327 11b4 CB01      		ldd r24,Y+13
+ 3328 11b6 9C8B      		ldd r25,Y+14
+ 3329 11b8 8B8B      		ldi r18,lo8(0x41200000)
+ 3330 11ba 00C0      		ldi r19,hi8(0x41200000)
+ 3331               		ldi r20,hlo8(0x41200000)
+ 3332 11bc 89E1      		ldi r21,hhi8(0x41200000)
+ 3333 11be 90E0      		call __mulsf3
+ 3334 11c0 9A8B      		movw r26,r24
+ 3335 11c2 898B      		movw r24,r22
+ 3336               		movw r22,r24
+ 3337               		movw r24,r26
+ 3338               		call __fixunssfsi
+ 3339               		movw r26,r24
+ 3340               		movw r24,r22
+ 3341               		std Y+6,r25
+ 3342 11c4 8989      		std Y+5,r24
+ 3343 11c6 9A89      		rjmp .L221
+ 3344               	.L222:
+ 3345               		ldi r24,lo8(25)
+ 3346 11c8 0197      		ldi r25,hi8(25)
+ 3347 11ca 01F4      		std Y+4,r25
+ 3348               		std Y+3,r24
+ 3349               	.LBB204:
+ 3350 11cc 9A8B      	.LBB205:
+ 3352               	.Ltext82:
+ 3354               	.LM224:
+ 3355               		ldd r24,Y+3
+ 3356               		ldd r25,Y+4
+ 3357               	/* #APP */
+ 3358 11d0 8B89      	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 3359 11d2 9C89      		1: sbiw r24,1
+ 3360 11d4 0197      		brne 1b
+ 3361 11d6 9C8B      	 ;  0 "" 2
+ 3362 11d8 8B8B      	/* #NOAPP */
+ 3363               		std Y+4,r25
+ 3364               		std Y+3,r24
+ 3365               	.LBE205:
+ 3366 11da 8B89      	.LBE204:
+ 3368 11de 0097      	.Ltext83:
+ 3370 11e2 00C0      	.LM225:
+ 3371               		ldd r24,Y+5
+ 3372               		ldd r25,Y+6
+ 3373               		sbiw r24,1
+ 3374 11e4 6D89      		std Y+6,r25
+ 3375 11e6 7E89      		std Y+5,r24
+ 3376 11e8 8F89      	.L221:
+ 3378 11ec 0E94 0000 	.LM226:
+ 3379 11f0 DC01      		ldd r24,Y+5
+ 3380 11f2 CB01      		ldd r25,Y+6
+ 3381 11f4 9C8B      		sbiw r24,0
+ 3382 11f6 8B8B      		brne .L222
+ 3383               		rjmp .L224
+ 3384 11f8 8B89      	.L232:
+ 3386 11fc 988B      	.LM227:
+ 3387 11fe 8F87      		ldd r22,Y+7
+ 3388               		ldd r23,Y+8
+ 3389               		ldd r24,Y+9
+ 3390               		ldd r25,Y+10
+ 3391               		call __fixunssfsi
+ 3392               		movw r26,r24
+ 3393               		movw r24,r22
+ 3394 1200 8F85      		std Y+6,r25
+ 3395 1202 9889      		std Y+5,r24
+ 3396               	.L218:
+ 3397               		ldd r24,Y+5
+ 3398 1204 0197      		ldd r25,Y+6
+ 3399 1206 01F4      		std Y+2,r25
+ 3400               		std Y+1,r24
+ 3401               	.LBB206:
+ 3402 1208 988B      	.LBB207:
+ 3404               	.Ltext84:
+ 3406               	.LM228:
+ 3407               		ldd r24,Y+1
+ 3408               		ldd r25,Y+2
+ 3409               	/* #APP */
+ 3410               	 ;  105 "c:/winavr/lib/gcc/../../avr/include/util/delay_basic.h" 1
+ 199:program.c     ****     _delay_ms (1) ;
+ 200:program.c     ****     Command = (1<<RS) | (0<<E) ;
+ 3411               	85
+ 3412               	.Ltext85:
+ 3414 120e F0E0      	.LM229:
+ 3415 1210 80E4      		adiw r28,29
+ 3416 1212 8083      		in __tmp_reg__,__SREG__
+ 3417 1214 80E0      		cli
+ 3418 1216 90E0      		out __SP_H__,r29
+ 3419 1218 A0E2      		out __SREG__,__tmp_reg__
+ 3420 121a B2E4      		out __SP_L__,r28
+ 3421 121c 8B87      		pop r28
+ 3422 121e 9C87      		pop r29
+ 3423 1220 AD87      		ret
+ 3425               	.Lscope5:
+ 3428               	.global	LCD_print
+ 3430               	LCD_print:
+ 3432 1226 7C85      	.LM230:
+ 3433 1228 8D85      	.LFBB6:
+ 3434 122a 9E85      		push r29
+ 3435 122c 20E0      		push r28
+ 3436 122e 30E0      		rcall .
+ 3437 1230 4AE7      		push __tmp_reg__
+ 3438 1232 53E4      		in r28,__SP_L__
+ 3439 1234 0E94 0000 		in r29,__SP_H__
+ 3440 1238 DC01      	/* prologue: function */
+ 3441 123a CB01      	/* frame size = 3 */
+ 3442 123c 8F83      		std Y+3,r25
+ 3443 123e 9887      		std Y+2,r24
+ 3445 1242 BA87      	.LM231:
+ 3446               		std Y+1,__zero_reg__
+ 3447               		rjmp .L234
+ 3448 1244 6F81      	.L235:
+ 3450 1248 8985      	.LM232:
+ 3451 124a 9A85      		ldd r24,Y+1
+ 3452 124c 20E0      		mov r18,r24
+ 3453 124e 30E0      		ldi r19,lo8(0)
+ 3454 1250 40E8      		ldd r24,Y+2
+ 3455 1252 5FE3      		ldd r25,Y+3
+ 3456 1254 0E94 0000 		movw r30,r24
+ 3457 1258 8823      		add r30,r18
+ 3458 125a 04F4      		adc r31,r19
+ 3459               		ld r24,Z
+ 3460               		call LCD_data
+ 3461               		ldd r24,Y+1
+ 3462 125c 81E0      		subi r24,lo8(-(1))
+ 3463 125e 90E0      		std Y+1,r24
+ 3464 1260 9E83      	.L234:
+ 3465 1262 8D83      		ldd r24,Y+1
+ 3466 1264 00C0      		mov r18,r24
+ 3467               		ldi r19,lo8(0)
+ 3468               		ldd r24,Y+2
+ 3469               		ldd r25,Y+3
+ 3470 1266 6F81      		movw r30,r24
+ 3471 1268 7885      		add r30,r18
+ 3472 126a 8985      		adc r31,r19
+ 3473 126c 9A85      		ld r24,Z
+ 3474 126e 20E0      		tst r24
+ 3475 1270 3FEF      		brne .L235
+ 3476 1272 4FE7      	/* epilogue start */
+ 3478 1276 0E94 0000 	.LM233:
+ 3479 127a 1816      		pop __tmp_reg__
+ 3480 127c 04F4      		pop __tmp_reg__
+ 3481               		pop __tmp_reg__
+ 3482               		pop r28
+ 3483               		pop r29
+ 3484 127e 6B85      		ret
+ 3489 1288 30E0      	.Lscope6:
+ 3491 128c 51E4      	.Letext0:
+ 3492 128e 0E94 0000 	.global __do_copy_data
+ 3493 1292 DC01      	...
+ 201:program.c     ****     _delay_ms ( 40 ) ;
+ 202:program.c     **** }
+ 203:program.c     **** 
+ 204:program.c     **** 
+ 205:program.c     **** // Data Printing Routine :
+ 206:program.c     **** 
+ 207:program.c     **** void LCD_print ( char *a) {
+ 208:program.c     **** 
+ 209:program.c     ****     unsigned char i = 0 ;
+ 210:program.c     ****     for (; a[i]!='\0' ; i++)      LCD_data( a[i] ) ;
+ 211:program.c     **** }
+DEFINED SYMBOLS
+                            *ABS*:00000000 program.c
+C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp/ccYgFukS.s:2      *ABS*:0000003f __SREG__
+C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp/ccYgFukS.s:3      *ABS*:0000003e __SP_H__
+C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp/ccYgFukS.s:4      *ABS*:0000003d __SP_L__
+C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp/ccYgFukS.s:5      *ABS*:00000034 __CCP__
+C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp/ccYgFukS.s:6      *ABS*:00000000 __tmp_reg__
+C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp/ccYgFukS.s:7      *ABS*:00000001 __zero_reg__
+C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp/ccYgFukS.s:75     .text:00000000 main
+C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp/ccYgFukS.s:809    .text:000003e4 Initialization
+C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp/ccYgFukS.s:3601   .text:0000130a LCD_print
+C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp/ccYgFukS.s:2832   .text:00000efc LCD_command
+C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp/ccYgFukS.s:1580   .text:000007d2 Checking
+C:\DOCUME~1\ADMINI~1\LOCALS~1\Temp/ccYgFukS.s:3216   .text:00001102 LCD_data
+
+UNDEFINED SYMBOLS
+__mulsf3
+__ltsf2
+__gtsf2
+__fixunssfsi
+__do_copy_data

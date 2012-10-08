@@ -1,0 +1,14 @@
+# depslib dependency file v1.0
+1340551239 source:e:\documents\avr\source code\icode\relaytimer\fuse.c
+	<avr/io.h>
+
+1340551239 source:e:\documents\avr\source code\icode\relaytimer\code\fuse.c
+	<avr/io.h>
+
+1340582771 source:e:\documents\avr\source code\icode\relaytimer\code\main.c
+	<avr/io.h>
+	<util/delay.h>
+
+1340551239 source:\\vboxsvr\aurangzaib\documents\avr\source code\icode\relaytimer\code\fuse.c
+	<avr/io.h>
+

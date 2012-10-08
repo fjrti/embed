@@ -1,0 +1,27 @@
+# depslib dependency file v1.0
+1339237843 source:c:\documents and settings\administrator\my documents\lcdtrial\fuse.c
+	<avr/io.h>
+
+1339257742 source:c:\documents and settings\administrator\my documents\lcdtrial\main.c
+	<avr/io.h>
+	<util/delay.h>
+
+1339237844 source:d:\avr\completed project\keypad and lcd\source code\fuse.c
+	<avr/io.h>
+
+1339671275 source:d:\avr\completed project\keypad and lcd\source code\main.c
+	"definition.h"
+
+1339671312 d:\avr\completed project\keypad and lcd\source code\definition.h
+	"declaration.h"
+
+1339669373 d:\avr\completed project\keypad and lcd\source code\declaration.h
+	<avr/io.h>
+	<util/delay.h>
+
+1339237844 source:d:\avr\source code\icode\c\lcdkeypad\alphanumeric\source code\fuse.c
+	<avr/io.h>
+
+1339237844 source:d:\avr\source code\icode\lcdkeypad\alphanumeric\source code\fuse.c
+	<avr/io.h>
+

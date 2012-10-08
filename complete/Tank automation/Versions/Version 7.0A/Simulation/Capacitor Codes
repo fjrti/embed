@@ -1,0 +1,29 @@
+Capacitor Code Guide
+
+VALUE     TYPE    CODE             VALUE                TYPE              CODE
+1.5pF   Ceramic                    1,000pF / .001uF     Ceramic / Mylar    102
+3.3pF   Ceramic                    1,500pF / .0015uF    Ceramic / Mylar    152
+10pF    Ceramic                    2,000pF / .002uF     Ceramic / Mylar    202
+15pF    Ceramic                    2,200pF / .0022uF    Ceramic / Mylar    222
+20pF    Ceramic                    4,700pF / .0047uF    Ceramic / Mylar    472
+30pF    Ceramic                    5,000pF / .005uF     Ceramic / Mylar    502
+33pF    Ceramic                    5,600pF / .0056uF    Ceramic / Mylar    562
+47pF    Ceramic                    6,800pF / .0068uF    Ceramic / Mylar    682
+56pF    Ceramic                    .01                  Ceramic / Mylar    103
+68pF    Ceramic                    .015                 Mylar                 
+75pF    Ceramic                    .02                  Mylar              203
+82pF    Ceramic                    .022                 Mylar              223
+91pF    Ceramic                    .033                 Mylar              333
+100pF   Ceramic    101             .047                 Mylar              473
+120pF   Ceramic    121             .05                  Mylar              503
+130pF   Ceramic    131             .056                 Mylar              563
+150pF   Ceramic    151             .068                 Mylar              683
+180pF   Ceramic    181             .1                   Mylar              104
+220pF   Ceramic    221             .2                   Mylar              204
+330pF   Ceramic    331             .22                  Mylar              224
+470pF   Ceramic    471             .33                  Mylar              334
+560pF   Ceramic    561             .47                  Mylar              474
+680pF   Ceramic    681             .56                  Mylar              564
+750pF   Ceramic    751             1                    Mylar              105
+820pF   Ceramic    821             2                    Mylar              205
+

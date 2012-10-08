@@ -1,0 +1,306 @@
+#include <avr/io.h>
+#include <util/delay.h>
+
+#define RS 6 // register select of lcd
+#define E 7 //  enable of lcd
+
+#define Data    	PORTC // lcd data
+#define Command 	PORTD // lcd command
+#define Load    	PORTB // relay load
+#define Control 	PINC // buttons
+
+#define LoadBit 	PB0
+#define SelectBit 	PC0
+#define IncrementBit 	PC1
+#define DecrementBit 	PC2
+
+#define LcdDataDirecton DDRC
+#define LcdCmdDirection DDRD
+#define LoadDirection   DDRB
+#define ControlDirection DDRC // also the lcd direction pin
+
+#define Set bit_is_set
+#define Clr bit_is_clear
+
+// declaration :
+
+void Initialization     (  ) ;              // lcd , buttons and timer
+void Commandfunction    ( unsigned char ) ; // lcd command routine
+void Datafunction       ( unsigned char ) ; // lcd command routine
+void Printfunction      ( char*)  ;         // lcd print routine
+void Loadoff (  ) ;
+void Loadon (   ) ;
+void TimeSet ( ) ;
+void Delay (    ) ;
+void TimeStart ( ) ;
+void DataConverted ( unsigned char, unsigned char ) ;
+void ShowSetTime ( ) ;
+
+signed char hour , minute , second ;
+
+// main function :
+
+int main ( ) {
+
+    Initialization( ) ;
+    Loadoff() ;
+
+    Printfunction( "Set time now") ;
+    Commandfunction ( 0x01 ) ;
+
+    TimeSet( ) ;
+    Loadon( ) ;
+
+    TimeStart ( ) ;
+    Loadoff   ( ) ;
+
+    return 0 ;
+}
+
+// Definition :
+
+void Initialization( ) {
+
+    LcdDataDirecton = 0xF0 ; // as output
+    LcdCmdDirection = (1<<RS) | (1<<E) ;
+    LoadDirection = (1<<LoadBit) ; // load off
+    ControlDirection = 0xF0 ;
+
+    Data = 0xFF ; // pull up registers
+    Loadoff (   ) ;
+
+    Commandfunction ( 0x33 ) ; // for 4 bit lcd
+    Commandfunction ( 0x32 ) ;  // for 4 bit lcd
+    Commandfunction ( 0x28 ) ;  // for 4 bit lcd
+    Commandfunction ( 0x0E ) ;  // cursor on
+    Commandfunction ( 0x06 ) ;
+    Commandfunction ( 0x01 ) ;  // clear
+}
+
+void Commandfunction ( unsigned char a ) {
+
+    Data = (Data&0x0F) | (a&0xF0) ;               // masking lower nibble
+    Command &= (~(1<<RS)) ;
+
+    Command |= (1<<E) ;
+    _delay_ms ( 1 ) ;
+    Command &= (~(1<<E)) ;   // strobing enable pin
+
+    Data = (Data&0x0F) | (a<<4) ;                   // masking higher nibble
+    Command &= (~(1<<RS)) ;
+
+    Command |= (1<<E) ;
+    _delay_ms ( 1 ) ;
+    Command &= (~(1<<E)) ;   // strobing enable pin
+
+    _delay_ms ( 10 ) ;
+}
+
+void Datafunction ( unsigned char a) {
+
+    Data = (Data&0x0F) | (a&0xF0) ;               // masking lower nibble
+    Command |= (1<<RS) ;
+
+    Command |= (1<<E) ;
+    _delay_ms ( 1 ) ;
+    Command &= (~(1<<E)) ;   // strobing enable pin
+
+    Data = (Data&0x0F) | (a<<4) ;                   // masking higher nibble
+    Command |= (1<<RS) ;
+
+    Command |= (1<<E) ;
+    _delay_ms ( 1 ) ;
+    Command &= (~(1<<E)) ;   // strobing enable pin
+
+    _delay_ms ( 10 ) ;
+}
+
+void Printfunction  ( char *a) {
+
+    for ( ; *a !='\0' ; a++ )   Datafunction ( *a ) ;
+    _delay_ms(100) ;
+
+}
+
+void Loadoff ( ) {
+
+    Load &= (~(1<<LoadBit) ) ;
+    Printfunction("Load is off") ;
+    Commandfunction(0x01) ;
+}
+
+void Loadon ( ) {
+
+    Load |= (1<<LoadBit) ;
+    Printfunction( "Load is on" ) ;
+    Commandfunction(0x01) ;
+}
+
+
+void TimeSet( )
+
+{
+    while ( 1 ) {
+        signed char counter = -1 ;
+        while ( Set (Control , SelectBit) ) ;
+        if    ( Clr (Control , SelectBit) ) {
+            PORTC |= (1<<SelectBit) ;
+            _delay_ms ( 1 ) ;
+            counter ++ ;
+
+            if  ( counter == 0 ) {
+                Printfunction ("hour selected ") ;
+                while ( counter == 0) {
+
+                    Commandfunction ( 0x01) ;
+                    if ( Clr (Control , IncrementBit) ) {
+
+                        hour ++ ;
+                        if ( hour == 24 )       hour = 0 ;
+                        Printfunction ("inc in hr") ;
+                        _delay_ms(50)  ;
+                        Commandfunction ( 0x01) ;
+                        ShowSetTime (   ) ;
+
+                    } else if ( Clr (Control , DecrementBit) ) {
+
+                        hour -- ;
+                        if ( hour == -1 )    hour = 24 ;
+                        Printfunction ("dec in hr") ;
+                        Commandfunction ( 0x01) ;
+                        ShowSetTime (   ) ;
+                    } else if   ( Clr(Control , SelectBit) )  counter ++ ;
+                }
+            }
+
+            if  ( counter == 1 ) {
+                Printfunction ("minute selected ") ;
+                while ( counter == 1) {
+
+                    Commandfunction ( 0x01) ;
+
+                    if ( Clr (Control , IncrementBit) ) {
+
+                        minute ++ ;
+                        if ( minute > 59 ) {
+                            minute = 0 ;
+                            ++hour ;
+                        }
+                        Printfunction ("inc in mm") ;
+                        Commandfunction ( 0x01 ) ;
+                        ShowSetTime (   ) ;
+                    } else if ( Clr (Control , DecrementBit) ) {
+
+                        hour -- ;
+                        if ( minute < 0 ) {
+                            minute = 59 ;
+                            --hour ;
+                        }
+                        Printfunction ("dec in mm") ;
+                        Commandfunction ( 0x01 ) ;
+                        ShowSetTime (   ) ;
+                    } else if    ( Clr(Control , SelectBit) ) counter ++ ;
+                }
+            }
+            while ( counter == 2 ) {
+
+                ShowSetTime (   ) ;
+                Printfunction ( "Exiting ") ;
+                Commandfunction ( 0x01) ;
+                goto outside ;
+            }
+        }
+    }
+outside :
+    Commandfunction(0x01) ;
+    return 0 ;
+}
+
+void TimeStart ( ) {
+
+    Commandfunction(0x80) ;
+    Printfunction("Remaining time : ") ;
+
+    signed char h=hour , m=minute , s=6 ;
+
+    for ( ; h!=0 || m!=0 || s!=0 ; s-- ) {
+
+        if ( s == 0 )
+            if ( m>0) {
+                s = 59 ;
+                m -= 1 ;
+            }
+        if ( m < 0 )
+            if ( h>0) {
+                m = 59 ;
+                h -= 1 ;
+            }
+        if ( h<0) h = 0 ;
+
+        DataConverted(h, 0xC2) ;
+        Commandfunction(0xC3) ;
+        Printfunction(":") ;
+        DataConverted(m , 0xC5) ;
+        Commandfunction(0xC6) ;
+        Printfunction(":") ;
+        DataConverted(s , 0xC8) ;
+
+        if ( (Clr(Control,SelectBit)) || (Clr(Control,IncrementBit)) || (Clr(Control,DecrementBit)) ) {
+
+            Commandfunction(0x01) ;
+            Printfunction("Interrupted") ;
+            Commandfunction(0x01) ;
+            goto Outside2 ;
+        }
+    }
+
+    Commandfunction( 0x01 ) ;
+    Printfunction( "Time is over ") ;
+
+    Commandfunction(0xC0) ;
+    Printfunction("Press to exit") ;
+    Commandfunction(0x01) ;
+
+    while ( (Set(Control,SelectBit)) && (Set(Control,IncrementBit)) && (Set(Control,DecrementBit)) ) ; // checking if any of key pressed
+Outside2 :
+    return 0 ;
+}
+
+void Delay ( ) {
+
+    TCCR0 = (1<<CS00) | (1<<CS01) | (WGM01) ;
+    TCNT0 = 0 ;
+    OCR0  = 125 ;
+
+    while ( (TIFR & (1<<OCF0)) == 0 ) ;
+    TCCR0 = 0 ;
+    TIFR  |= (1<<OCF0) ;
+}
+
+void DataConverted ( unsigned char variable, unsigned char position ) {
+
+    unsigned char convert , loop = 0 ;
+    for  ( ; loop<2 ; loop++ ) {
+
+        convert = variable % 10 ; // to make it bcd
+        variable /= 10 ;
+
+        Commandfunction ( position ) ; // this is very important
+        Datafunction ( convert + 48 ) ; // to make data ascii
+        position-- ;
+    }
+}
+
+void ShowSetTime ( ) {
+
+    Commandfunction(0x80) ;
+    Printfunction("hr : ") ;
+    DataConverted(hour , 0x85) ;
+
+    Commandfunction(0xC0) ;
+    Printfunction("mn : ") ;
+    DataConverted(minute , 0xC5) ;
+
+    _delay_ms(100) ;
+    Commandfunction ( 0x01 ) ;
+}

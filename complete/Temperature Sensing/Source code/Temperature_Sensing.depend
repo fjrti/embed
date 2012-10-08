@@ -1,0 +1,7 @@
+# depslib dependency file v1.0
+1339335432 source:c:\documents and settings\administrator\my documents\temperature_sensing\fuse.c
+	<avr/io.h>
+
+1339335434 source:d:\avr\completed project\temperature sensing\source code\fuse.c
+	<avr/io.h>
+

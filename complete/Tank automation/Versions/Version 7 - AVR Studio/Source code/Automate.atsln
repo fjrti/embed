@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Atmel Studio Solution File, Format Version 11.00
+Project("{54F91283-7BC4-4236-8FF9-10F437C3AD48}") = "Automate", "Automate.cproj", "{FC387C87-E3B9-4308-9CA2-4432BDD3C916}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|AVR = Debug|AVR
+		Release|AVR = Release|AVR
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FC387C87-E3B9-4308-9CA2-4432BDD3C916}.Debug|AVR.ActiveCfg = Debug|AVR
+		{FC387C87-E3B9-4308-9CA2-4432BDD3C916}.Debug|AVR.Build.0 = Debug|AVR
+		{FC387C87-E3B9-4308-9CA2-4432BDD3C916}.Release|AVR.ActiveCfg = Release|AVR
+		{FC387C87-E3B9-4308-9CA2-4432BDD3C916}.Release|AVR.Build.0 = Release|AVR
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

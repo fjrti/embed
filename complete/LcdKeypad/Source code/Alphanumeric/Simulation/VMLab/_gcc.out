@@ -1,0 +1,64 @@
+set -e; avr-gcc -MM -mmcu=atmega16 -I. -O0 -gstabs -std=gnu99  -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums  -Wall -Wstrict-prototypes  -Wa,-adhlns=program.lst   program.c \
+	| sed 's,\(.*\)\.o[ :]*,\1.o \1.d : ,g' > program.d; \
+	[ -s program.d ] || rm -f program.d
+
+-------- begin --------
+avr-gcc (WinAVR 20100110) 4.3.3
+Copyright (C) 2008 Free Software Foundation, Inc.
+This is free software; see the source for copying conditions.  There is NO
+warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+
+Compiling: program.c
+avr-gcc -c -mmcu=atmega16 -I. -O0 -gstabs -std=gnu99  -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums  -Wall -Wstrict-prototypes  -Wa,-adhlns=program.lst   program.c -o program.o
+In file included from program.c:24:
+c:/winavr/lib/gcc/../../avr/include/util/delay.h:85:3: warning: #warning "F_CPU not defined for <util/delay.h>"
+c:/winavr/lib/gcc/../../avr/include/util/delay.h:90:3: warning: #warning "Compiler optimizations disabled; functions from <util/delay.h> won't work as designed"
+program.c:47: warning: function declaration isn't a prototype
+program.c:49: warning: function declaration isn't a prototype
+program.c:58: warning: function declaration isn't a prototype
+program.c:84: warning: function declaration isn't a prototype
+program.c:112: warning: function declaration isn't a prototype
+
+Linking: program.elf
+avr-gcc -mmcu=atmega16 -I. -O0 -gstabs -std=gnu99  -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums  -Wall -Wstrict-prototypes  -Wa,-adhlns=program.o   program.o  --output program.elf -lm -Wl,-Map=program.map -Wl,--cref
+
+Creating load file for Flash: program.hex
+avr-objcopy -O ihex -R .eeprom program.elf program.hex
+
+Creating load file for EEPROM: program.eep
+avr-objcopy -j .eeprom --set-section-flags=.eeprom="alloc,load" \
+	--change-section-lma .eeprom=0 -O ihex program.elf program.eep
+c:\winavr\bin\avr-objcopy.exe: --change-section-lma .eeprom=0x00000000 never used
+
+Creating Extended Listing: program.lss
+avr-objdump -h -S program.elf > program.lss
+
+Creating Symbol Table: program.sym
+avr-nm -n program.elf > program.sym
+
+Converting to AVR COFF: program.cof
+avr-objcopy --debugging --change-section-address .data-0x800000 --change-section-address .bss-0x800000 --change-section-address .noinit-0x800000 --change-section-address .eeprom-0x810000 -O coff-ext-avr program.elf program.cof   # Extended COFF. Supported in VMLAB from rel. 3.10
+Discarding local symbol outside any compilation unit: .do_copy_data_start
+Discarding local symbol outside any compilation unit: .do_copy_data_loop
+c:\winavr\bin\avr-objcopy.exe: --change-section-vma .eeprom+0xff7f0000 never used
+c:\winavr\bin\avr-objcopy.exe: --change-section-lma .eeprom+0xff7f0000 never used
+c:\winavr\bin\avr-objcopy.exe: --change-section-vma .noinit+0xff800000 never used
+c:\winavr\bin\avr-objcopy.exe: --change-section-lma .noinit+0xff800000 never used
+c:\winavr\bin\avr-objcopy.exe: --change-section-vma .bss+0xff800000 never used
+c:\winavr\bin\avr-objcopy.exe: --change-section-lma .bss+0xff800000 never used
+
+Size after:
+program.elf  :
+section     size      addr
+.text       5626         0
+.data         42   8388704
+.stab       4764         0
+.stabstr    1857         0
+Total      12289
+
+
+
+Errors: none
+-------- end --------
+

@@ -1,0 +1,4 @@
+# depslib dependency file v1.0
+1343388109 source:c:\users\aurangzaib\documents\avr\source code\completed project\motor automation\source code\fuse.c
+	<avr/io.h>
+

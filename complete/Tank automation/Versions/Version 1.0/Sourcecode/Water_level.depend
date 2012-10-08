@@ -1,0 +1,35 @@
+# depslib dependency file v1.0
+1340227280 source:d:\avr\source code\icode\c\water_level\main.c
+	<avr/io.h>
+	<util/delay.h>
+
+1340746871 source:d:\avr\source code\completed project\water level detector\sourcecode\main.c
+	"Definition.c"
+
+1340749421 d:\avr\source code\completed project\water level detector\sourcecode\definition.c
+	"Declaration.h"
+
+1340748834 d:\avr\source code\completed project\water level detector\sourcecode\declaration.h
+	<avr/io.h>
+	<util/delay.h>
+
+1340746872 source:f:\source code\completed project\water level detector\sourcecode\main.c
+	"Definition.c"
+
+1340775620 f:\source code\completed project\water level detector\sourcecode\definition.c
+	"Declaration.h"
+
+1340775468 f:\source code\completed project\water level detector\sourcecode\declaration.h
+	<avr/io.h>
+	<util/delay.h>
+
+1340746872 source:\\vboxsvr\aurangzaib\documents\avr\source code\completed project\water level detector\sourcecode\main.c
+	"Definition.c"
+
+1342610968 \\vboxsvr\aurangzaib\documents\avr\source code\completed project\water level detector\sourcecode\definition.c
+	"Declaration.h"
+
+1342609761 \\vboxsvr\aurangzaib\documents\avr\source code\completed project\water level detector\sourcecode\declaration.h
+	<avr/io.h>
+	<util/delay.h>
+
