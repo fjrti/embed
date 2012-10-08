@@ -72,7 +72,7 @@ pwm contorl of lcd backlight ( experimental, not in commercial )
 #define GError              ((!GEmpty) && (!GFull) && (!GHalf) && (!GOneThird) && (!GOneFourth))
 #define Error               (( OError ) || ( GError ))
 
-#define Speaker_On         (  1<<Speaker)
+#define Speaker_On         ( 1<<Speaker)
 #define Speaker_Off        (~(1<<Speaker))
 #define OMotor_On           (1<<OMotor)
 #define OMotor_Off          (~(1<<OMotor))
