@@ -412,6 +412,6 @@ unsigned char LineChecking ( )
             return on ;
         }
     return off ;                                                                            // else if ( LineOff ) { return off ; }
-}
+} 
 
 #endif                                                                                      // LIBRARY_C_INCLUDED
