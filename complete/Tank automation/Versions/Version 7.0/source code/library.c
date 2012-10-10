@@ -262,7 +262,7 @@ void Operation ( )
 
                                     unsigned char check = LineChecking( )  ;
 
-                                    if      ( check == on )
+                                    if      ( check == on ) 
                                         {
                                             LoadOn ( ground ) ;
                                         }
